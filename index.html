@@ -572,6 +572,8 @@
 // ✅ v9.9 FIX 5: beforeunload kayıt kontrolü eklendi
 // ✅ v9.9 FIX 6: autoCleanup requestIdleCallback ile erteleniyor
 // ✅ v9.9 FIX 7: Sporcu değişim sızıntısı kapatıldı (session reset + orphan guard)
+// ✅ v9.9 FIX 8: syncAthleteToSidebar() — sporcu profili sidebar inputlarına yansıtılıyor
+//               (startNewSession, openAthleteDetail, saveAthleteProfile, init)
 // =============================================================
 
 window.addEventListener('error', function (e) {
@@ -759,6 +761,25 @@ function getAthleteHeight() {
 function getAthleteWeight(fallbackId) {
     if (STATE.currentAthlete && STATE.athletes[STATE.currentAthlete]?.profile?.weight) return STATE.athletes[STATE.currentAthlete].profile.weight;
     return parseFloat(document.getElementById(fallbackId || 'squatBodyWeight')?.value) || 75;
+}
+
+// ✅ v9.9 FIX 8: Sporcu profilini sidebar input'larına senkronize eden ortak fonksiyon
+function syncAthleteToSidebar() {
+    const a = STATE.athletes[STATE.currentAthlete];
+    if (!a?.profile) return false;
+    const p = a.profile;
+    if (p.height) {
+        const el = document.getElementById('userHeight');
+        if (el) el.value = p.height;
+    }
+    if (p.weight) {
+        ['squatBodyWeight', 'pushupBodyWeight', 'deadliftBodyWeight', 'jumpBodyWeight', 'dropjumpBodyWeight']
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = p.weight;
+            });
+    }
+    return true;
 }
 
 function setLoadMode(exercise, mode) {
@@ -2731,11 +2752,11 @@ function deleteAthlete(id) {
     }
 }
 
-// ✅ v9.9 FIX 7: Sporcu değişiminde session sıfırla
+// ✅ v9.9 FIX 7 + FIX 8: Sporcu değişiminde session sıfırla + sidebar senkronizasyonu
 function openAthleteDetail(id) {
     const a = STATE.athletes[id];
     if (!a) return;
-    // 🆕 FIX 7: Farklı sporcuya geçildiyse oturumu sıfırla
+    // FIX 7: Farklı sporcuya geçildiyse oturumu sıfırla
     if (STATE.currentAthlete !== id) {
         if (STATE.currentSessionId) {
             STATE.log(`🔄 Sporcu değişti, oturum sıfırlandı`, 'info');
@@ -2747,6 +2768,8 @@ function openAthleteDetail(id) {
     document.getElementById('athleteDetailTitle').innerHTML = `👤 <span>${escapeHtml(a.name)}</span> <small style="font-size:12px;color:var(--text-dim);font-weight:400;">· ${a.sessions.length} oturum</small>`;
     renderProfileCard(); renderSessions(); closeAthletes();
     document.getElementById('athleteDetailPanel').classList.add('open');
+    // FIX 8: Sporcu seçildiği anda sidebar'ı güncelle
+    syncAthleteToSidebar();
     updateCalibrationBadge();
 }
 function renderProfileCard() {
@@ -2817,6 +2840,8 @@ function toggleProfileEdit() {
     const isActive = form.classList.toggle('active');
     if (btn) btn.textContent = isActive ? '✕ Kapat' : '✏️ Düzenle';
 }
+
+// ✅ v9.9 FIX 8: Ortak syncAthleteToSidebar() kullanılıyor (manuel atamalar kaldırıldı)
 function saveAthleteProfile() {
     if (!STATE.currentAthlete) return;
     const a = STATE.athletes[STATE.currentAthlete];
@@ -2830,8 +2855,7 @@ function saveAthleteProfile() {
     const notes = document.getElementById('pcNotes')?.value || '';
     a.profile = { height, weight, birthYear, position, dominantFoot, team, notes };
     saveAthletes();
-    document.getElementById('userHeight').value = height;
-    ['squatBodyWeight', 'pushupBodyWeight', 'deadliftBodyWeight', 'jumpBodyWeight', 'dropjumpBodyWeight'].forEach(id => document.getElementById(id).value = weight);
+    syncAthleteToSidebar();  // FIX 8: tek satır, ortak fonksiyon
     renderProfileCard(); renderAthletes(); updateCalibrationBadge();
     STATE.log(`✏️ ${a.name} profili güncellendi`, 'success');
     showToast('✅ Profil kaydedildi', 'success', 2500);
@@ -2853,7 +2877,6 @@ function updateCalibrationBadge() {
 // ✅ v9.9 FIX 7: Panel kapanınca oturumu sıfırla
 function closeAthleteDetail() {
     document.getElementById('athleteDetailPanel').classList.remove('open');
-    // 🆕 FIX 7: Pencereyi kapatınca aktif oturumu temizle
     if (STATE.currentSessionId) {
         STATE.currentSessionId = null;
         STATE.sessionBuffer = [];
@@ -2893,10 +2916,13 @@ function deleteSession(athleteId, sessionDate) {
     a.sessions = a.sessions.filter(s => s.date !== sessionDate);
     saveAthletes(); renderSessions();
 }
+
+// ✅ v9.9 FIX 8: Yeni test başlarken sidebar'ı sporcu profiliyle senkronize et
 function startNewSession() {
     if (!STATE.currentAthlete) { showToast('Önce sporcu seçin', 'warning'); return; }
     STATE.sessionBuffer = [];
     STATE.currentSessionId = Date.now();
+    syncAthleteToSidebar();  // FIX 8: sporcunun kg/boy değerlerini sidebar'a yansıt
     const aName = STATE.athletes[STATE.currentAthlete]?.name || '';
     STATE.log(`🎬 Yeni oturum: ${aName}`, 'success');
     showToast(`🎬 Oturum hazır: ${escapeHtml(aName)}`, 'success', 3500);
@@ -2909,7 +2935,7 @@ function addTestToSession(record) {
     if (!STATE.currentAthlete || !STATE.athletes[STATE.currentAthlete]) return false;
     const a = STATE.athletes[STATE.currentAthlete];
 
-    // 🆕 FIX 7: currentSessionId başka sporcuda mı kalmış? Sızıntıyı yakala
+    // FIX 7: currentSessionId başka sporcuda mı kalmış? Sızıntıyı yakala
     if (STATE.currentSessionId) {
         const ownSession = a.sessions.find(s => s.date === STATE.currentSessionId);
         if (!ownSession) {
@@ -3500,6 +3526,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
         loadAthletes();
+        // ✅ v9.9 FIX 8: Başlangıçta aktif sporcu varsa sidebar'ı senkronize et
+        if (STATE.currentAthlete) syncAthleteToSidebar();
         const suggested = detectDevice();
         document.querySelectorAll('.device-card').forEach(c => { if (c.dataset.device === suggested) c.classList.add('suggested'); });
         applyDeviceLayout(suggested);
@@ -3513,7 +3541,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ac !== null) { STATE.autoCleanupEnabled = ac === '1'; document.getElementById('autoCleanupToggle').checked = STATE.autoCleanupEnabled; }
         } catch (_) {}
 
-        STATE.log('🚀 Azythos Motion v9.9 STABIL + session fix hazır', 'success');
+        STATE.log('🚀 Azythos Motion v9.9 STABIL + session fix + sidebar sync hazır', 'success');
         document.getElementById('telMode').textContent = '—';
         document.getElementById('telProgress').textContent = 'Beklemede';
         updateGlobalDisplay(); updateCalibrationBadge();
@@ -3560,9 +3588,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 · STABIL + SESSION FIX');
+        console.log('◈ Azythos Motion v9.9 · STABIL + SESSION FIX + SIDEBAR SYNC');
         console.log('✅ hipMap bellek fix · canlı test koruması · RFD tek yerde · Queue limit 5');
         console.log('✅ Sporcu değişim sızıntısı kapatıldı (session reset + orphan guard)');
+        console.log('✅ syncAthleteToSidebar() — sporcu profili artık sidebar inputlarına yansıyor');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
@@ -3619,6 +3648,7 @@ window.findStableBaseline = findStableBaseline;
 window.cleanupOldVideos = cleanupOldVideos;
 window.showStorageInfo = showStorageInfo;
 window.retryPostProcess = retryPostProcess;
+window.syncAthleteToSidebar = syncAthleteToSidebar;
 </script>
 </body>
 </html>
