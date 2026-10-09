@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azythos Motion v9.9 · Stabil Production Ultimate Biomechanics</title>
+    <title>Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -100,6 +100,21 @@
         .chart-wrap canvas{width:100%!important;height:100%!important}
         .countdown-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:72px;font-weight:900;color:var(--accent-emerald);text-shadow:0 0 60px rgba(16,185,129,.5);z-index:20;pointer-events:none;opacity:0;transition:opacity .2s;font-family:var(--font-mono)}
         .countdown-overlay.show{opacity:1}
+        /* AMRAP */
+        .amrap-card{border-color:#8b5cf6!important}
+        .amrap-overlay{position:absolute;inset:0;background:rgba(2,6,23,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+        .amrap-overlay.visible{display:flex;animation:fade-in .3s ease}
+        .amrap-exercise-badge{font-size:14px;font-weight:800;color:#8b5cf6;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px;text-shadow:0 0 30px rgba(139,92,246,.5)}
+        .amrap-counter{font-size:160px;font-weight:900;color:var(--accent-emerald);font-family:var(--font-mono);line-height:1;text-shadow:0 0 80px rgba(16,185,129,.6);transition:transform .15s var(--transition-smooth)}
+        .amrap-counter.bump{transform:scale(1.12)}
+        .amrap-timer{font-size:36px;font-weight:800;color:var(--text-primary);font-family:var(--font-mono);margin-top:16px;letter-spacing:3px}
+        .amrap-info{font-size:14px;color:var(--text-secondary);margin-top:20px;font-family:var(--font-mono);text-align:center;min-height:44px;line-height:1.7}
+        .amrap-stop-btn{position:absolute;bottom:32px;right:32px;padding:22px 46px;border-radius:60px;background:var(--accent-rose);color:#fff;font-size:19px;font-weight:900;border:4px solid rgba(255,255,255,.25);cursor:pointer;box-shadow:0 0 60px rgba(244,63,94,.6);font-family:var(--font-display);letter-spacing:1.5px;animation:pulse-dot 1.4s infinite;transition:transform .2s}
+        .amrap-stop-btn:hover{transform:scale(1.06);background:#dc2626}
+        .amrap-stop-btn:active{transform:scale(.94)}
+        .amrap-limit-warn{position:absolute;top:24px;right:24px;font-size:12px;color:var(--accent-amber);background:rgba(251,191,36,.18);padding:8px 16px;border-radius:40px;font-weight:800;letter-spacing:1px;border:1px solid rgba(251,191,36,.4)}
+        .amrap-limit-progress{position:absolute;top:24px;left:24px;font-size:12px;color:var(--accent-violet);background:rgba(139,92,246,.18);padding:8px 16px;border-radius:40px;font-weight:800;font-family:var(--font-mono);border:1px solid rgba(139,92,246,.4)}
+        @media (max-width:600px){.amrap-counter{font-size:100px}.amrap-timer{font-size:26px}.amrap-stop-btn{padding:18px 32px;font-size:16px;bottom:20px;right:20px}}
         .postprocess-badge{position:absolute;bottom:24px;right:24px;background:rgba(2,6,23,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--accent-amber);border-radius:var(--radius-sm);padding:12px 16px;z-index:25;display:none;min-width:220px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.6);pointer-events:auto}
         .postprocess-badge.visible{display:block;animation:slide-up .35s var(--transition-smooth)}
         .postprocess-badge .ppb-header{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--accent-amber);margin-bottom:6px;text-transform:uppercase}
@@ -206,6 +221,7 @@
         .profile-card .pc-warn{margin-top:10px;padding:8px 12px;border-radius:8px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--accent-amber);font-size:11.5px;line-height:1.5}
         .gold-badge{display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:40px;letter-spacing:.5px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0a0e1a;margin-left:6px}
         .refined-data{background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(16,185,129,.05));border:1px solid rgba(251,191,36,.3)!important}
+        .amrap-data{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(34,211,238,.05));border:1px solid rgba(139,92,246,.35)!important}
         .hipmap-container{margin-top:10px;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid var(--border-subtle)}
         .hipmap-container canvas{width:100%;height:100px;display:block;border-radius:6px}
         .hipmap-legend{display:flex;gap:10px;margin-top:6px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);flex-wrap:wrap}
@@ -320,7 +336,7 @@
             <div style="margin-top:8px;font-size:11px;color:var(--text-dim);" id="calibHint">Aktif sporcu seçilirse sporcunun profili kullanılır.</div>
         </div>
         <div class="card" style="border-color:var(--accent-cyan);">
-            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9</span></div>
+            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9 ULT</span></div>
             <div class="control-row" style="justify-content:flex-start;gap:16px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalUpper" checked onchange="updateGlobalDisplay()"> Üst</label>
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalLower" checked onchange="updateGlobalDisplay()"> Alt</label>
@@ -363,7 +379,7 @@
         </div>
 
         <div class="card" data-mode="dropjump" style="border-color:var(--accent-rose);">
-            <div class="card-title"><span class="icon">🔽</span> Drop Jump <span class="badge" style="background:linear-gradient(135deg,#f43f5e,#fbbf24);color:#fff;">RSI v9.9</span></div>
+            <div class="card-title"><span class="icon">🔽</span> Drop Jump <span class="badge" style="background:linear-gradient(135deg,#f43f5e,#fbbf24);color:#fff;">RSI</span></div>
             <div class="card-desc">Yüksekten düş + hemen zıpla. Yere değme süresi otomatik tespit.</div>
             <div class="control-row"><label>Tekrar</label><input type="number" id="dropjumpReps" value="3" min="1" max="8"></div>
             <div class="control-row" style="margin-top:6px;"><label>Vücut Ağırlığı (kg)</label><input type="number" id="dropjumpBodyWeight" value="75" min="30" max="200" step="0.5"></div>
@@ -428,6 +444,31 @@
             <button class="btn btn-outline" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="startMode('plank')">▶ Başlat</button>
         </div>
 
+        <div class="card amrap-card" data-mode="amrap">
+            <div class="card-title"><span class="icon">🎯</span> Sınırsız Analiz <span class="badge" style="background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;">AMRAP</span></div>
+            <div class="card-desc">Sporcu yapabildiği kadar yapar. Sistem otomatik sayar + yorgunluk analizi çıkarır.</div>
+            <div class="control-row" style="margin-bottom:8px;">
+                <label>Hareket</label>
+                <select id="amrapExercise" style="background:rgba(0,0,0,.3);border:1px solid var(--border-subtle);color:var(--text-primary);padding:6px 10px;border-radius:6px;font-size:13px;flex:1;max-width:180px;">
+                    <option value="pushup" selected>Şınav</option>
+                    <option value="squat">Squat</option>
+                    <option value="situp">Mekik</option>
+                    <option value="pullup">Barfiks</option>
+                    <option value="plank">Plank</option>
+                </select>
+            </div>
+            <div class="control-row" style="margin-bottom:8px;">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:700;text-transform:none;color:#8b5cf6;font-size:12px;cursor:pointer;">
+                    <input type="checkbox" id="amrapUseLimit" onchange="updateAMRAPLimit()">🔒 Limit kullan (hedef tekrar)
+                </label>
+            </div>
+            <div class="control-row" id="amrapLimitRow" style="display:none;">
+                <label>Hedef Tekrar</label>
+                <input type="number" id="amrapLimitReps" value="30" min="1" max="500">
+            </div>
+            <button class="btn" style="background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;" onclick="startAMRAP()">🎯 Sınırsız Analizi Başlat</button>
+        </div>
+
         <div class="card" data-mode="power" style="border-color:var(--accent-rose);">
             <div class="card-title"><span class="icon">⚡</span> Kasılma-Gevşeme Güç Testi <span class="badge">YENİ</span></div>
             <div class="control-row"><label>Ağırlık (kg)</label><input type="number" id="powerWeight" value="10" min="0.5" max="300" step="0.5"></div>
@@ -445,7 +486,7 @@
         </div>
 
         <div class="card" data-mode="free">
-            <div class="card-title"><span class="icon">🎯</span> Serbest Analiz <span class="badge">Esnek</span></div>
+            <div class="card-title"><span class="icon">🎬</span> Serbest Analiz <span class="badge">Esnek</span></div>
             <div class="control-row">
                 <label>Süre</label>
                 <div><input type="range" id="freeDuration" min="3" max="60" value="12"><span id="freeDurationLabel" style="font-family:var(--font-mono);font-size:13px;min-width:32px;">12s</span></div>
@@ -478,6 +519,17 @@
             <span class="cam-label" id="camLabel">Ön</span>
         </div>
         <div class="countdown-overlay" id="countdownOverlay"></div>
+
+        <div class="amrap-overlay" id="amrapOverlay">
+            <div class="amrap-limit-warn" id="amrapLimitWarn" style="display:none;">🔒 LİMİT: <span id="amrapLimitDisplay">30</span></div>
+            <div class="amrap-limit-progress" id="amrapLimitProgress" style="display:none;">HEDEF: 0 / 30</div>
+            <div class="amrap-exercise-badge" id="amrapExBadge">ŞINAV</div>
+            <div class="amrap-counter" id="amrapCounter">0</div>
+            <div class="amrap-timer" id="amrapTimer">00:00</div>
+            <div class="amrap-info" id="amrapInfo">Hazır...</div>
+            <button class="amrap-stop-btn" onclick="stopAMRAP()">⏹ DURDUR</button>
+        </div>
+
         <div class="postprocess-badge" id="postProcessBadge">
             <div class="ppb-header"><span class="ppb-icon">🔬</span><span>ALTIN STANDART ANALİZ</span></div>
             <div class="ppb-queue" id="ppQueueStatus"></div>
@@ -564,26 +616,14 @@
 
 <script>
 // =============================================================
-// v9.9 · STABIL PRODUCTION
-// ✅ v9.9 FIX 1: hipMap her tekrarda sıfırlanıyor (bellek şişmesi giderildi)
-// ✅ v9.9 FIX 2: YZ duraklatma sadece IDLE modda (canlı testi etkilemiyor)
-// ✅ v9.9 FIX 3: Canlı Drop Jump RFD kaldırıldı (post-process'te doğru hesaplanıyor)
-// ✅ v9.9 FIX 4: Queue max 5 (bellek taşması önlendi)
-// ✅ v9.9 FIX 5: beforeunload kayıt kontrolü eklendi
-// ✅ v9.9 FIX 6: autoCleanup requestIdleCallback ile erteleniyor
-// ✅ v9.9 FIX 7: Sporcu değişim sızıntısı kapatıldı (session reset + orphan guard)
-// ✅ v9.9 FIX 8: syncAthleteToSidebar() — sporcu profili sidebar inputlarına yansıtılıyor
-//               (startNewSession, openAthleteDetail, saveAthleteProfile, init)
+// v9.9 ULTIMATE · STABIL + AMRAP
 // =============================================================
 
 window.addEventListener('error', function (e) {
     console.error('Global error:', e.message, e.error);
     try { showToast('Hata: ' + (e.message || 'bilinmeyen'), 'error', 5000); } catch (_) {}
 });
-window.addEventListener('unhandledrejection', function (e) {
-    console.error('Unhandled rejection:', e.reason);
-});
-
+window.addEventListener('unhandledrejection', function (e) { console.error('Unhandled rejection:', e.reason); });
 window.addEventListener('beforeunload', function (e) {
     if (STATE && (STATE.postProcessQueue.length > 0 || STATE.postProcessing || STATE.isRecording)) {
         e.preventDefault();
@@ -618,7 +658,7 @@ const STATE = {
     livePoseFrameSkip: 0,
     MAX_QUEUE_SIZE: 5,
     brain: {
-        jump: {}, dropjump: {}, squat: {}, pushup: {}, lunge: {}, deadlift: {}, plank: {}, power: {}, free: {},
+        jump: {}, dropjump: {}, squat: {}, pushup: {}, lunge: {}, deadlift: {}, plank: {}, power: {}, free: {}, amrap: {},
         load: {
             squat: { mode: 'none', weight: 0, bodyWeight: 75 },
             deadlift: { mode: 'none', weight: 0, bodyWeight: 75 },
@@ -676,17 +716,18 @@ function updateGoldStandard() {
     STATE.goldStandardEnabled = document.getElementById('goldStandardToggle').checked;
     try { localStorage.setItem('azythos_gold_standard', STATE.goldStandardEnabled ? '1' : '0'); } catch (_) {}
     showToast(STATE.goldStandardEnabled ? '🏆 Altın standart aktif' : '⚡ Hızlı mod', STATE.goldStandardEnabled ? 'success' : 'info', 2500);
-    STATE.log(`🏆 Altın standart: ${STATE.goldStandardEnabled ? 'AKTİF' : 'KAPALI'}`, 'info');
 }
 function updatePauseQueue() {
     STATE.pauseQueueEnabled = document.getElementById('pauseQueueToggle').checked;
     try { localStorage.setItem('azythos_pause_queue', STATE.pauseQueueEnabled ? '1' : '0'); } catch (_) {}
-    STATE.log(`⏸️ Kuyrukta YZ duraklat: ${STATE.pauseQueueEnabled ? 'AKTİF' : 'KAPALI'}`, 'info');
 }
 function updateAutoCleanup() {
     STATE.autoCleanupEnabled = document.getElementById('autoCleanupToggle').checked;
     try { localStorage.setItem('azythos_auto_cleanup', STATE.autoCleanupEnabled ? '1' : '0'); } catch (_) {}
-    STATE.log(`🗑️ Otomatik temizlik: ${STATE.autoCleanupEnabled ? 'AKTİF' : 'KAPALI'}`, 'info');
+}
+function updateAMRAPLimit() {
+    const use = document.getElementById('amrapUseLimit').checked;
+    document.getElementById('amrapLimitRow').style.display = use ? 'flex' : 'none';
 }
 
 function toggleTheme() {
@@ -762,22 +803,14 @@ function getAthleteWeight(fallbackId) {
     if (STATE.currentAthlete && STATE.athletes[STATE.currentAthlete]?.profile?.weight) return STATE.athletes[STATE.currentAthlete].profile.weight;
     return parseFloat(document.getElementById(fallbackId || 'squatBodyWeight')?.value) || 75;
 }
-
-// ✅ v9.9 FIX 8: Sporcu profilini sidebar input'larına senkronize eden ortak fonksiyon
 function syncAthleteToSidebar() {
     const a = STATE.athletes[STATE.currentAthlete];
     if (!a?.profile) return false;
     const p = a.profile;
-    if (p.height) {
-        const el = document.getElementById('userHeight');
-        if (el) el.value = p.height;
-    }
+    if (p.height) { const el = document.getElementById('userHeight'); if (el) el.value = p.height; }
     if (p.weight) {
         ['squatBodyWeight', 'pushupBodyWeight', 'deadliftBodyWeight', 'jumpBodyWeight', 'dropjumpBodyWeight']
-            .forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = p.weight;
-            });
+            .forEach(id => { const el = document.getElementById(id); if (el) el.value = p.weight; });
     }
     return true;
 }
@@ -798,7 +831,6 @@ function readLoadConfig(exercise) {
     cfg.userHeight = getAthleteHeight();
     return cfg;
 }
-
 function pixelDist(p1, p2) { if (!p1 || !p2) return 0; return Math.hypot(p1.x - p2.x, p1.y - p2.y); }
 function estimatePixelPerCm(lm, userHeightCm) {
     const shR = lm[11], shL = lm[12], anR = lm[27], anL = lm[28];
@@ -814,7 +846,6 @@ function angularROMToCm(startDeg, endDeg, userHeightCm, segment) {
     const lm = { leg: userHeightCm * 0.45, arm: userHeightCm * 0.35, forearm: userHeightCm * 0.15, torso: userHeightCm * 0.30 };
     return (lm[segment] || userHeightCm * 0.35) * Math.abs(endDeg - startDeg) * Math.PI / 180;
 }
-
 function computeRepower({ weightKg, bodyWeightKg, mode, movedCm, durationMs, bodyFactor = 0.85 }) {
     if (!durationMs || durationMs < 50) return null;
     const g = 9.81, movedM = movedCm / 100, durationSec = durationMs / 1000;
@@ -823,7 +854,6 @@ function computeRepower({ weightKg, bodyWeightKg, mode, movedCm, durationMs, bod
     return {
         forceN: Math.round(forceN), workJ: +workJ.toFixed(1), powerW: Math.round(powerW),
         powerPerKg: +(powerW / bodyWeightKg).toFixed(2),
-        loadRatio: +(mode === 'weighted' ? (weightKg + bodyWeightKg * bodyFactor) / bodyWeightKg : bodyFactor).toFixed(2),
         velocity: +(movedM / durationSec).toFixed(2), movedCm: Math.round(movedCm), durationMs: Math.round(durationMs),
     };
 }
@@ -925,7 +955,7 @@ function interpretExplosiveProfile(pv, rfd, rsi) {
 function initDB() {
     return new Promise((resolve) => {
         try {
-            const req = indexedDB.open('AzythosMotionDB', 10);
+            const req = indexedDB.open('AzythosMotionDB', 12);
             req.onupgradeneeded = (e) => {
                 const d = e.target.result;
                 if (!d.objectStoreNames.contains('records')) d.createObjectStore('records', { keyPath: 'id' });
@@ -946,21 +976,17 @@ async function cleanupOldVideos(manual = false) {
         let count = 0;
         for (const rec of all) {
             if (rec.id < cutoff && rec.videoFile) {
-                rec.videoFile = null;
-                rec.videoDeleted = true;
-                rec.videoDeletedAt = Date.now();
-                store.put(rec);
-                count++;
+                rec.videoFile = null; rec.videoDeleted = true; rec.videoDeletedAt = Date.now();
+                store.put(rec); count++;
             }
         }
         await new Promise(r => tx.oncomplete = r);
         if (count > 0) {
-            STATE.log(`🗑️ ${count} eski video temizlendi (30+ gün)`, 'info');
+            STATE.log(`🗑️ ${count} eski video temizlendi`, 'info');
             if (manual) showToast(`🗑️ ${count} eski video silindi`, 'success', 3000);
         } else if (manual) showToast('Temizlenecek eski video yok', 'info', 2500);
     } catch (e) { STATE.log('Temizlik hatası: ' + e.message, 'warning'); }
 }
-
 async function showStorageInfo() {
     if (!STATE.db) { showToast('Veritabanı yok', 'warning'); return; }
     try {
@@ -1018,7 +1044,6 @@ async function tryStartCameraFromGesture() {
         openPermOverlay(); setPermStatus(cameraErrorMessage(reason, err), 'error'); showPermissionHelp(reason);
     }
 }
-
 function openPermOverlay() {
     document.getElementById('permOverlay').classList.remove('hidden');
     const btn = document.getElementById('permBtn');
@@ -1098,7 +1123,6 @@ function continueWithoutCamera() {
     document.getElementById('hudDot').className = 'dot warn';
     document.getElementById('hudStatus').textContent = 'Kamera yok';
 }
-
 function getCameraResolution() {
     const t = STATE.deviceType;
     if (t === 'phone') return { width: 640, height: 480, frameRate: { ideal: 120, min: 30 } };
@@ -1142,7 +1166,7 @@ async function setupPose() {
     document.getElementById('hudStatus').textContent = 'Hazır';
     updateCamLabel();
     await checkActualCameraFps();
-    speak('Azythos Motion v9.9 hazır.');
+    speak('Azythos Motion v9.9 Ultimate hazır.');
 }
 async function restartCamera() {
     if (STATE.camera) { try { await STATE.camera.stop(); } catch (_) {} STATE.camera = null; }
@@ -1162,12 +1186,9 @@ async function checkActualCameraFps() {
             else if (fps > 0) el.innerHTML = `📹 <strong style="color:var(--accent-amber);">${fps}fps</strong> · hedef 120`;
             else el.innerHTML = `📹 fps: bilinmiyor`;
         }
-        if (fps && fps < 60) {
-            showToast(`⚠️ Kamera ${fps}fps (hedef 120). RSI hassasiyeti düşük.`, 'warning', 6000);
-        }
+        if (fps && fps < 60) showToast(`⚠️ Kamera ${fps}fps (hedef 120). RSI hassasiyeti düşük.`, 'warning', 6000);
     } catch (_) {}
 }
-
 function updateCamLabel() {
     const isFront = STATE.facingMode === 'user';
     const lbl = document.getElementById('camLabel');
@@ -1250,12 +1271,6 @@ function drawSkeleton(lm) {
         if (p && p.visibility > 0.6) {
             ctx.fillStyle = isActive ? '#3b82f6' : '#94a3b8';
             ctx.beginPath(); ctx.arc(p.x * w, p.y * h, isActive ? 8 : 5, 0, Math.PI * 2); ctx.fill();
-            if (isActive) {
-                ctx.shadowBlur = 14; ctx.shadowColor = 'rgba(59,130,246,0.4)';
-                ctx.fillStyle = 'rgba(59,130,246,0.2)';
-                ctx.beginPath(); ctx.arc(p.x * w, p.y * h, 14, 0, Math.PI * 2); ctx.fill();
-                ctx.shadowBlur = 0;
-            }
         }
     });
 }
@@ -1266,6 +1281,11 @@ function runBiometrics(lm) {
     const mode = STATE.currentMode;
     if (STATE.mode === 'PREP') {
         if (mode === 'free') { handleFreePrep(lm); return; }
+        if (mode === 'amrap') {
+            STATE.brain.amrap.prepTime = (STATE.brain.amrap.prepTime || 0) + 1;
+            if (STATE.brain.amrap.prepTime > 35) startAMRAPRecording();
+            return;
+        }
         STATE.brain[mode].prepTime = (STATE.brain[mode].prepTime || 0) + 1;
         if (STATE.brain[mode].prepTime > 35) {
             startRecording(); STATE.mode = 'BUSY';
@@ -1277,18 +1297,12 @@ function runBiometrics(lm) {
             b.freeData = []; b.startTime = Date.now();
             b.jumpTime = 0; b.topH = 0;
             b.bestR = 180; b.bestL = 180;
-            b.jumpResults = [];
-            b.hipMap = [];
+            b.jumpResults = []; b.hipMap = [];
             b.testStartTime = Date.now();
-            b.baseYLocked = false;
-            b.baselineBuffer = [];
-            b.stepOffDetected = false;
-            b.touched = false;
-            b.deepestY = 0;
-            b.deepestTime = 0;
-            b.lastHip = undefined;
-            b.lastTime = 0;
-            b.v = undefined;
+            b.baseYLocked = false; b.baselineBuffer = [];
+            b.stepOffDetected = false; b.touched = false;
+            b.deepestY = 0; b.deepestTime = 0;
+            b.lastHip = undefined; b.lastTime = 0; b.v = undefined;
             b.phase = 'IDLE';
             b.plankTarget = parseInt(document.getElementById('plankDuration')?.value) || 30;
             speak('Başlayın!');
@@ -1298,11 +1312,340 @@ function runBiometrics(lm) {
         return;
     }
     if (STATE.mode === 'BUSY' || STATE.mode === 'COUNTDOWN') {
-        const h = { jump: calcJump, dropjump: calcDropJump, squat: calcSquat, pushup: calcPushup, lunge: calcLunge, deadlift: calcDeadlift, plank: calcPlank, power: calcPower, free: calcFree }[mode];
+        const h = { jump: calcJump, dropjump: calcDropJump, squat: calcSquat, pushup: calcPushup, lunge: calcLunge, deadlift: calcDeadlift, plank: calcPlank, power: calcPower, free: calcFree, amrap: calcAMRAP }[mode];
         if (h) h(lm);
     }
 }
 
+// =============================================================
+// AMRAP
+// =============================================================
+function startAMRAP() {
+    if (!STATE.cameraReady) { showToast('Kamera hazır değil', 'warning'); openPermOverlay(); return; }
+    if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { showToast('⚠️ Önce mevcut testi bitirin', 'warning'); return; }
+
+    const ex = document.getElementById('amrapExercise')?.value || 'pushup';
+    const useLimit = document.getElementById('amrapUseLimit')?.checked || false;
+    const limitReps = useLimit ? (parseInt(document.getElementById('amrapLimitReps')?.value) || 30) : 0;
+
+    if (STATE.currentAthlete) syncAthleteToSidebar();
+
+    STATE.currentMode = 'amrap';
+    STATE.mode = 'PREP';
+    STATE.doneReps = 0;
+    STATE.metrics = [];
+    STATE.finishPending = false;
+    if (STATE.finishTimer) { clearTimeout(STATE.finishTimer); STATE.finishTimer = null; }
+
+    STATE.brain.amrap = {
+        exercise: ex, useLimit, limitReps, reps: [],
+        startTime: 0, amrapStart: 0, prepTime: 0,
+        isDown: false, bothDown: false, pushCooldown: 0,
+        pushStartTime: 0, bestDeg: 180, lastRepTime: 0,
+        running: false, warnedOrient: false,
+    };
+
+    const exNames = { pushup:'Şınav', squat:'Squat', situp:'Mekik', pullup:'Barfiks', plank:'Plank' };
+    speak(`${exNames[ex]} sınırsız analizi başlıyor.`);
+    STATE.log(`🎯 AMRAP başlatıldı: ${exNames[ex]}`, 'info');
+
+    showTelemetry('AMRAP', `0 / ${useLimit ? limitReps : '∞'}`, 'Hazırlanıyor...');
+    updateHUD('PREP');
+    document.getElementById('telemetryPanel').classList.add('visible');
+    document.getElementById('chartWrap').classList.add('visible');
+    if (!STATE.chart) initChart();
+}
+function startAMRAPRecording() {
+    startRecording();
+    STATE.mode = 'BUSY';
+    const b = STATE.brain.amrap;
+    b.startTime = performance.now();
+    b.amrapStart = performance.now();
+    b.lastRepTime = performance.now();
+    b.running = true;
+
+    const exLabel = { pushup:'ŞINAV', squat:'SQUAT', situp:'MEKİK', pullup:'BARFİKS', plank:'PLANK' }[b.exercise];
+    document.getElementById('amrapExBadge').textContent = exLabel;
+    document.getElementById('amrapCounter').textContent = b.exercise === 'plank' ? '0.0s' : '0';
+    document.getElementById('amrapTimer').textContent = '00:00';
+    document.getElementById('amrapInfo').textContent = 'Başla!';
+    document.getElementById('amrapLimitWarn').style.display = b.useLimit ? 'block' : 'none';
+    document.getElementById('amrapLimitProgress').style.display = b.useLimit ? 'block' : 'none';
+    if (b.useLimit) {
+        document.getElementById('amrapLimitDisplay').textContent = b.limitReps;
+        document.getElementById('amrapLimitProgress').textContent = `HEDEF: 0 / ${b.limitReps}`;
+    }
+    document.getElementById('amrapOverlay').classList.add('visible');
+    document.getElementById('telemetryPanel').classList.remove('visible');
+    document.getElementById('chartWrap').classList.remove('visible');
+    updateHUD('BUSY');
+    speak('Başla!');
+}
+function stopAMRAP() {
+    if (STATE.mode !== 'BUSY' && STATE.mode !== 'PREP') return;
+    const b = STATE.brain.amrap;
+    if (!b) return;
+    if (!b.running) {
+        document.getElementById('amrapOverlay').classList.remove('visible');
+        STATE.mode = 'IDLE';
+        updateHUD('IDLE');
+        document.getElementById('telemetryPanel').classList.remove('visible');
+        document.getElementById('chartWrap').classList.remove('visible');
+        return;
+    }
+    b.running = false;
+    b.totalMs = performance.now() - b.amrapStart;
+
+    const fatigue = computeAMRAPFatigue(b);
+    b.fatigue = fatigue;
+    b.finalSummary = computeAMRAPSummary(b, fatigue);
+
+    const info = document.getElementById('amrapInfo');
+    info.innerHTML = `✅ DURDURULDU<br>Toplam: <strong>${b.reps.length}</strong> tekrar · <strong>${(b.totalMs/1000).toFixed(1)}s</strong><br>Yorgunluk: <strong>%${fatigue.index}</strong> (${fatigue.label})`;
+
+    STATE.log(`⏹ AMRAP: ${b.reps.length} tekrar · Yorgunluk %${fatigue.index}`, 'success');
+    speak(`${b.reps.length} tekrar. Yorgunluk ${fatigue.index} yüzde.`);
+
+    setTimeout(() => {
+        document.getElementById('amrapOverlay').classList.remove('visible');
+        finishMode(300);
+    }, 2400);
+}
+function calcAMRAP(lm) {
+    const b = STATE.brain.amrap;
+    if (!b || !b.running) return;
+    const orient = getActiveOrientation();
+    const ex = b.exercise;
+
+    if (ex === 'plank') {
+        const elapsed = performance.now() - b.amrapStart;
+        document.getElementById('amrapTimer').textContent = formatAMRAPTime(elapsed);
+        document.getElementById('amrapCounter').textContent = (elapsed/1000).toFixed(1) + 's';
+        return;
+    }
+
+    let deg = 180;
+    let isDown = false, isUp = false;
+
+    if (ex === 'pushup') {
+        if (orient === 'side') {
+            const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
+            const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
+            deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+        } else {
+            deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+        }
+        isDown = deg < 100; isUp = deg > 150;
+    } else if (ex === 'squat') {
+        if (orient === 'side') {
+            const visR = (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0) + (lm[27]?.visibility || 0);
+            const visL = (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0) + (lm[28]?.visibility || 0);
+            deg = visR >= visL ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
+        } else {
+            deg = (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
+        }
+        isDown = deg < 115; isUp = deg > 150;
+    } else if (ex === 'situp') {
+        if (orient === 'side') {
+            const visR = (lm[11]?.visibility || 0) + (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0);
+            const visL = (lm[12]?.visibility || 0) + (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0);
+            deg = visR >= visL ? getAngleDeg(lm[11], lm[23], lm[25]) : getAngleDeg(lm[12], lm[24], lm[26]);
+        } else {
+            deg = (getAngleDeg(lm[11], lm[23], lm[25]) + getAngleDeg(lm[12], lm[24], lm[26])) / 2;
+        }
+        isDown = deg < 100; isUp = deg > 130;
+    } else if (ex === 'pullup') {
+        if (orient === 'front') {
+            deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+        } else {
+            const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
+            const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
+            deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+        }
+        isDown = deg < 100; isUp = deg > 150;
+    }
+
+    if (b.pushCooldown > 0) b.pushCooldown--;
+
+    if (!b.bothDown && isDown && b.pushCooldown === 0) {
+        b.bothDown = true;
+        b.pushStartTime = performance.now();
+        b.bestDeg = deg;
+    }
+    if (b.bothDown && deg < b.bestDeg) b.bestDeg = deg;
+
+    if (b.bothDown && isUp && b.pushCooldown === 0 && (performance.now() - b.pushStartTime > 250)) {
+        const repDuration = performance.now() - b.pushStartTime;
+        const now = performance.now();
+        const restTime = b.reps.length > 0 ? Math.max(0, now - b.lastRepTime - b.reps[b.reps.length - 1].dur) : 0;
+
+        b.reps.push({
+            index: b.reps.length + 1,
+            t: Math.round(now - b.amrapStart),
+            dur: Math.round(repDuration),
+            rom: Math.round(180 - b.bestDeg),
+            rest: Math.round(restTime),
+            deg: Math.round(b.bestDeg),
+        });
+
+        b.lastRepTime = now;
+        b.bothDown = false;
+        b.pushCooldown = 15;
+        b.bestDeg = 180;
+        STATE.doneReps = b.reps.length;
+
+        const cnt = document.getElementById('amrapCounter');
+        cnt.textContent = b.reps.length;
+        cnt.classList.add('bump');
+        setTimeout(() => cnt.classList.remove('bump'), 150);
+
+        const lastRep = b.reps[b.reps.length - 1];
+        const totalSec = (now - b.amrapStart) / 1000;
+        const tempo = totalSec > 0 ? (b.reps.length / (totalSec / 60)).toFixed(1) : '—';
+        document.getElementById('amrapInfo').innerHTML =
+            `Son: ${(lastRep.dur/1000).toFixed(2)}s · Dinlenme: ${(lastRep.rest/1000).toFixed(2)}s<br>Tempo: <strong>${tempo}</strong> tekrar/dk`;
+
+        if (b.useLimit) {
+            document.getElementById('amrapLimitProgress').textContent = `HEDEF: ${b.reps.length} / ${b.limitReps}`;
+            if (b.reps.length >= b.limitReps) {
+                STATE.log(`🔒 Limit ulaşıldı: ${b.limitReps}`, 'success');
+                speak(`${b.limitReps} tekrar. Limit tamamlandı.`);
+                setTimeout(() => stopAMRAP(), 800);
+                return;
+            }
+        }
+    }
+
+    const elapsed = performance.now() - b.amrapStart;
+    document.getElementById('amrapTimer').textContent = formatAMRAPTime(elapsed);
+}
+function formatAMRAPTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function computeAMRAPFatigue(b) {
+    if (b.reps.length < 3) return { index: 0, level: 'unknown', label: 'Yetersiz veri', color: 'text-dim', detail: '', avgDurFirst: 0, avgDurLast: 0, durChangePct: 0, avgRestFirst: 0, avgRestLast: 0, restChangePct: 0, avgRomFirst: 0, avgRomLast: 0, romChangePct: 0 };
+    const reps = b.reps;
+    const n = reps.length;
+    const quarter = Math.max(2, Math.floor(n / 4));
+    const firstReps = reps.slice(0, quarter);
+    const lastReps = reps.slice(-quarter);
+    const avgDurFirst = firstReps.reduce((s, r) => s + r.dur, 0) / firstReps.length;
+    const avgDurLast = lastReps.reduce((s, r) => s + r.dur, 0) / lastReps.length;
+    const durChangePct = avgDurFirst > 0 ? ((avgDurLast - avgDurFirst) / avgDurFirst) * 100 : 0;
+    const avgRestFirst = firstReps.reduce((s, r) => s + (r.rest || 0), 0) / firstReps.length;
+    const avgRestLast = lastReps.reduce((s, r) => s + (r.rest || 0), 0) / lastReps.length;
+    const restChangePct = avgRestFirst > 0 ? ((avgRestLast - avgRestFirst) / avgRestFirst) * 100 : 0;
+    const avgRomFirst = firstReps.reduce((s, r) => s + r.rom, 0) / firstReps.length;
+    const avgRomLast = lastReps.reduce((s, r) => s + r.rom, 0) / lastReps.length;
+    const romChangePct = avgRomFirst > 0 ? ((avgRomLast - avgRomFirst) / avgRomFirst) * 100 : 0;
+    let score = 0;
+    score += Math.min(30, Math.max(0, durChangePct * 0.3));
+    score += Math.min(30, Math.max(0, restChangePct * 0.3));
+    score += Math.min(40, Math.max(0, Math.abs(romChangePct) * 0.8));
+    score = Math.round(Math.min(100, score));
+    let level, label, color, detail;
+    if (score < 20) { level='elite'; label='Elit Dayanıklılık'; color='emerald'; detail='Yorgunluk direnci mükemmel.'; }
+    else if (score < 40) { level='verygood'; label='Çok İyi Dayanıklılık'; color='cyan'; detail='Sağlıklı yorgunluk profili.'; }
+    else if (score < 60) { level='good'; label='İyi Dayanıklılık'; color='blue'; detail='Kabul edilebilir seviye.'; }
+    else if (score < 80) { level='weak'; label='Zayıf Dayanıklılık'; color='amber'; detail='Yorgunluk hızlı birikiyor.'; }
+    else { level='critical'; label='Kritik Yorgunluk'; color='rose'; detail='Ciddi dayanıklılık eksikliği.'; }
+    return {
+        index: score, level, label, color, detail,
+        avgDurFirst: Math.round(avgDurFirst), avgDurLast: Math.round(avgDurLast), durChangePct: +durChangePct.toFixed(1),
+        avgRestFirst: Math.round(avgRestFirst), avgRestLast: Math.round(avgRestLast), restChangePct: +restChangePct.toFixed(1),
+        avgRomFirst: Math.round(avgRomFirst), avgRomLast: Math.round(avgRomLast), romChangePct: +romChangePct.toFixed(1),
+    };
+}
+function computeAMRAPSummary(b, fatigue) {
+    const reps = b.reps;
+    if (!reps.length) return null;
+    const totalMs = b.totalMs || (performance.now() - b.amrapStart);
+    const totalSec = totalMs / 1000;
+    const tempo = totalSec > 0 ? reps.length / (totalSec / 60) : 0;
+    const avgDur = reps.reduce((s, r) => s + r.dur, 0) / reps.length;
+    const avgRest = reps.reduce((s, r) => s + (r.rest || 0), 0) / reps.length;
+    const avgRom = reps.reduce((s, r) => s + r.rom, 0) / reps.length;
+    return {
+        exercise: 'amrap', amrapExercise: b.exercise,
+        totalReps: reps.length, totalSec: +totalSec.toFixed(1),
+        tempo: +tempo.toFixed(2), avgDurMs: Math.round(avgDur),
+        avgRestMs: Math.round(avgRest), avgRom: Math.round(avgRom),
+        useLimit: b.useLimit, limitReps: b.useLimit ? b.limitReps : null,
+        fatigue: fatigue, reps: reps.slice(),
+    };
+}
+function formatAMRAPMetrics(s) {
+    if (!s) return ['Veri yok'];
+    const exLabel = { pushup:'Şınav', squat:'Squat', situp:'Mekik', pullup:'Barfiks', plank:'Plank' }[s.amrapExercise] || s.amrapExercise;
+    const lines = [
+        `🎯 SINIRSIZ ANALİZ`,
+        `Hareket: ${exLabel}`,
+        `Toplam Tekrar: ${s.totalReps}`,
+        `Süre: ${s.totalSec}s`,
+        `Tempo: ${s.tempo} tekrar/dk`,
+        `Ort. Tekrar Süresi: ${s.avgDurMs}ms`,
+        `Ort. Dinlenme: ${s.avgRestMs}ms`,
+        `Ort. ROM: ${s.avgRom}°`,
+    ];
+    if (s.fatigue) lines.push(`📉 Yorgunluk Indexi: %${s.fatigue.index} (${s.fatigue.label})`);
+    if (s.useLimit) lines.push(`🔒 Limit: ${s.limitReps} tekrar`);
+    return lines;
+}
+function renderAMRAPFatigueChart(reps) {
+    if (!reps || reps.length < 2) return null;
+    const W = 800, H = 240;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#0a0e1a'; cx.fillRect(0, 0, W, H);
+    const pad = { t: 30, r: 30, b: 40, l: 60 };
+    const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+    cx.strokeStyle = 'rgba(255,255,255,.15)'; cx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const gy = pad.t + (ch / 4) * i;
+        cx.beginPath(); cx.moveTo(pad.l, gy); cx.lineTo(W - pad.r, gy); cx.stroke();
+    }
+    cx.fillStyle = 'rgba(255,255,255,.5)'; cx.font = '11px monospace';
+    cx.fillText('Yavaş', 5, pad.t + 10);
+    cx.fillText('Hızlı', 5, pad.t + ch - 5);
+    const maxDur = Math.max(...reps.map(r => r.dur));
+    const minDur = Math.min(...reps.map(r => r.dur));
+    const durRange = maxDur - minDur || 1;
+    const durPoints = reps.map((r, i) => ({
+        x: pad.l + (i / (reps.length - 1)) * cw,
+        y: pad.t + ch - ((r.dur - minDur) / durRange) * ch,
+    }));
+    const grad = cx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+    grad.addColorStop(0, 'rgba(34, 211, 238, 0.4)');
+    grad.addColorStop(1, 'rgba(34, 211, 238, 0.05)');
+    cx.beginPath();
+    cx.moveTo(durPoints[0].x, pad.t + ch);
+    durPoints.forEach(p => cx.lineTo(p.x, p.y));
+    cx.lineTo(durPoints[durPoints.length-1].x, pad.t + ch);
+    cx.closePath();
+    cx.fillStyle = grad; cx.fill();
+    cx.beginPath();
+    durPoints.forEach((p, i) => i ? cx.lineTo(p.x, p.y) : cx.moveTo(p.x, p.y));
+    cx.strokeStyle = '#22d3ee'; cx.lineWidth = 2.5; cx.stroke();
+    durPoints.forEach(p => {
+        cx.beginPath(); cx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        cx.fillStyle = '#22d3ee'; cx.fill();
+    });
+    cx.fillStyle = '#22d3ee'; cx.font = 'bold 12px monospace';
+    cx.fillText('Tekrar Süresi (ms)', pad.l, pad.t - 10);
+    cx.fillStyle = 'rgba(255,255,255,.5)'; cx.font = '11px monospace';
+    cx.fillText('1', pad.l, H - 20);
+    cx.fillText(`${reps.length}`, W - pad.r - 20, H - 20);
+    cx.fillText('Tekrar #', W / 2 - 25, H - 5);
+    return c.toDataURL('image/png');
+}
+
+// =============================================================
+// Diger testler
+// =============================================================
 function calcJump(lm) {
     const b = STATE.brain.jump;
     const orient = getActiveOrientation();
@@ -1312,10 +1655,8 @@ function calcJump(lm) {
     const now = performance.now();
     const heightCm = getAthleteHeight();
     const nowCm = diff * heightCm * 0.92;
-
     if (!b.hipMap) b.hipMap = [];
     b.hipMap.push({ t: now - (b.testStartTime || now), y: hip, cm: +nowCm.toFixed(2), phase: 'idle' });
-
     if (!b.isUp && diff > 0.045) {
         b.isUp = true; b.jumpTime = now;
         b.pushOffStart = b.lastDownTime || (now - 300);
@@ -1323,13 +1664,11 @@ function calcJump(lm) {
         b.hipMap.forEach(p => { if (p.t > b.pushOffStart - b.testStartTime) p.phase = 'push-off'; });
     }
     if (!b.isUp && hip > (b.lastLowestY || 0)) { b.lastLowestY = hip; b.lastDownTime = now; }
-
     if (b.isUp) {
         if (diff > b.topH) b.topH = diff;
         if (hip < (b.peakY || 1)) b.peakY = hip;
         const troCm = Math.round(b.topH * heightCm * 0.92);
         updateTelemetry('Sıçrama (canlı)', `${troCm} cm`, '');
-
         if (diff < 0.015 && (now - b.jumpTime > 300)) {
             const flightTimeSec = (now - b.jumpTime) / 1000;
             const pushOffMs = b.jumpTime - b.pushOffStart;
@@ -1344,12 +1683,8 @@ function calcJump(lm) {
             const analysisStart = Math.max(0, takeoffIdx - Math.round(150 * 30 / 1000));
             const rfd = computeRFD({ hipMap: b.hipMap, bodyWeightKg: bodyWeight, analysisStartFrame: analysisStart, analysisEndFrame: takeoffIdx, fps: 30 });
             const pushInterp = interpretPushVelocity(pushVelocity);
-            const rfdInterp = interpretRFD(rfd?.rfdNsPerKg);
-
             b.hipMap.forEach(p => { if (p.t > b.jumpTime - b.testStartTime) p.phase = 'flight'; });
-
             const repHipMap = b.hipMap.slice();
-
             const result = {
                 index: b.jumpResults.length + 1, jumpHeightCm: flightHeightCm, trochanterCm: troCm,
                 sayersPowerW, samozinoPowerW: samozino?.peakPowerW || null, powerPerKg, chainEfficiency: chainEff,
@@ -1358,24 +1693,18 @@ function calcJump(lm) {
                 bodyWeightKg: bodyWeight, timestamp: Date.now(), hipMap: repHipMap
             };
             b.jumpResults.push(result); STATE.doneReps++;
-
             document.getElementById('telDynamic').innerHTML = `
                 <div class="t-row"><span class="t-label">📏 Sıçrama</span><span class="t-value highlight">${flightHeightCm} cm</span></div>
                 <div class="t-row"><span class="t-label">🔗 Kinetik Zincir</span><span class="t-value highlight">${troCm} cm (%${chainEff})</span></div>
                 <div class="t-row"><span class="t-label">⚡ Zirve Güç</span><span class="t-value highlight">${sayersPowerW} W</span></div>
                 ${samozino ? `<div class="t-row"><span class="t-label">🔬 Samozino</span><span class="t-value">${samozino.peakPowerW} W</span></div>` : ''}
                 <div class="t-row"><span class="t-label">🚀 İtme Hızı</span><span class="t-value">${pushVelocity} m/s</span></div>
-                <div class="t-row" style="font-size:10px;color:var(--accent-${pushInterp.color});"><span></span><span>${pushInterp.label}</span></div>
                 ${rfd ? `<div class="t-row"><span class="t-label">💥 RFD</span><span class="t-value">${rfd.rfdNsPerKg} N/s/kg</span></div>` : ''}
-                <div class="t-row"><span class="t-label">💨 Uçuş</span><span class="t-value">${flightTimeSec.toFixed(3)} s</span></div>
             `;
-            STATE.metrics.push(`${result.index}. sıçrama: ${flightHeightCm}cm · ${troCm}cm(%${chainEff}) · ${sayersPowerW}W · ${pushVelocity}m/s`);
+            STATE.metrics.push(`${result.index}. sıçrama: ${flightHeightCm}cm · ${troCm}cm(%${chainEff}) · ${sayersPowerW}W`);
             speak(`${flightHeightCm} santim, ${sayersPowerW} vat`);
-
             b.isUp = false; b.topH = 0; b.lastLowestY = 0;
-            b.hipMap = [];
-            b.testStartTime = now;
-
+            b.hipMap = []; b.testStartTime = now;
             updateProgress();
             if (STATE.doneReps >= STATE.goalReps) { b.finalSummary = computeJumpSummary(b); finishMode(STATE.goldStandardEnabled ? 800 : 1500); }
         }
@@ -1400,84 +1729,53 @@ function computeJumpSummary(b) {
         results: b.jumpResults.slice(),
     };
 }
-
 function calcDropJump(lm) {
     const b = STATE.brain.dropjump;
     const orient = getActiveOrientation();
     if (orient !== 'side' && !b.warnedOrient) { b.warnedOrient = true; STATE.log('⚠️ Drop jump için YANDAN mod gerekli!', 'warning'); }
-
     const hip = orient === 'side' ? (lm[23]?.visibility > lm[24]?.visibility ? lm[23].y : lm[24].y) : (lm[23].y + lm[24].y) / 2;
     const now = performance.now();
     const heightCm = getAthleteHeight();
-
     const dt = now - (b.lastTime || now);
     if (dt > 0 && dt < 200) {
         const vRaw = (hip - (b.lastHip ?? hip)) / dt;
         b.v = b.v === undefined ? vRaw : b.v * 0.65 + vRaw * 0.35;
     }
     b.lastHip = hip; b.lastTime = now;
-
     if (!b.hipMap) b.hipMap = [];
     b.hipMap.push({ t: now - (b.testStartTime || now), y: hip, cm: 0, phase: 'idle' });
-
     if (!b.baseYLocked) {
         b.baselineBuffer = b.baselineBuffer || [];
-        if (b.v !== undefined && Math.abs(b.v) < 0.0002) {
-            b.baselineBuffer.push(hip);
-        }
+        if (b.v !== undefined && Math.abs(b.v) < 0.0002) b.baselineBuffer.push(hip);
         if (b.baselineBuffer.length >= 25) {
             const mean = b.baselineBuffer.reduce((a, x) => a + x, 0) / b.baselineBuffer.length;
             const variance = b.baselineBuffer.reduce((a, x) => a + (x - mean) ** 2, 0) / b.baselineBuffer.length;
-            if (variance < 0.0003) {
-                b.baseY = mean;
-                b.baseYLocked = true;
-                STATE.log(`🔬 Baseline kilitlendi (n=${b.baselineBuffer.length})`, 'info');
-                updateTelemetry('Drop Jump', 'Hazır', 'Kutudan atlayın');
-            } else {
-                b.baselineBuffer = b.baselineBuffer.slice(-10);
-            }
+            if (variance < 0.0003) { b.baseY = mean; b.baseYLocked = true; updateTelemetry('Drop Jump', 'Hazır', 'Kutudan atlayın'); }
+            else b.baselineBuffer = b.baselineBuffer.slice(-10);
         }
         b.baselineBuffer = b.baselineBuffer.slice(-50);
         return;
     }
-
     const belowBase = hip - b.baseY;
-
     if (!b.stepOffDetected) {
-        if (belowBase > 0.04 && b.v > 0.0003) {
-            b.stepOffDetected = true;
-            b.fallingStart = now;
-            STATE.log('⬇️ Kutu bırakıldı', 'info');
-        }
+        if (belowBase > 0.04 && b.v > 0.0003) { b.stepOffDetected = true; b.fallingStart = now; }
         return;
     }
-
     if (!b.touched) {
         if (hip > (b.deepestY || 0)) { b.deepestY = hip; b.deepestTime = now; }
         if (b.deepestTime && (now - b.deepestTime > 60) && Math.abs(b.v || 0) < 0.00015) {
-            b.touched = true;
-            b.touchTime = b.deepestTime;
-            b.groundY = b.deepestY;
-            const dropDepthCm = Math.round((b.groundY - b.baseY) * heightCm * 0.92);
-            STATE.log(`🦶 Yere değdi (düşüş: ${dropDepthCm}cm)`, 'info');
+            b.touched = true; b.touchTime = b.deepestTime; b.groundY = b.deepestY;
         }
         return;
     }
-
     if (!b.isUp) {
-        if (b.v < -0.0012) {
-            b.isUp = true; b.jumpTime = now; b.topH = 0;
-            b.groundContactMs = now - b.touchTime;
-            STATE.log(`🚀 Takeoff (yerde ${Math.round(b.groundContactMs)}ms)`, 'info');
-        }
+        if (b.v < -0.0012) { b.isUp = true; b.jumpTime = now; b.topH = 0; b.groundContactMs = now - b.touchTime; }
         return;
     }
-
     const aboveGround = b.groundY - hip;
     if (aboveGround > b.topH) b.topH = aboveGround;
     const troCm = Math.round(b.topH * heightCm * 0.92);
     updateTelemetry('Drop Jump', `${troCm} cm`, `Yerde: ${Math.round(now - b.touchTime)}ms`);
-
     if (aboveGround < 0.015 && (now - b.jumpTime > 250)) {
         const flightSec = (now - b.jumpTime) / 1000;
         const jumpHeightCm = computeJumpHeightFromFlight(flightSec);
@@ -1486,47 +1784,33 @@ function calcDropJump(lm) {
         const rsi = computeRSI(jumpHeightCm, b.groundContactMs);
         const rsiInterp = interpretRSI(rsi);
         const pushVelocity = computePushVelocity(jumpHeightCm, b.groundContactMs);
-
         b.hipMap.forEach(p => {
             const pTime = p.t + b.testStartTime;
             if (pTime < b.touchTime) p.phase = 'pre-drop';
             else if (pTime >= b.touchTime && pTime < b.jumpTime) p.phase = 'push-off';
             else if (pTime >= b.jumpTime) p.phase = 'flight';
         });
-
         const repHipMap = b.hipMap.slice();
-
         const result = {
             index: b.jumpResults.length + 1, jumpHeightCm, trochanterCm: troCm,
             sayersPowerW: sayersW, rsi, groundContactMs: Math.round(b.groundContactMs),
             flightTimeSec: +flightSec.toFixed(3), pushVelocity,
             rfdNs: null, rfdNsPerKg: null, rfdPending: true,
-            rsiInterp, pushInterp: interpretPushVelocity(pushVelocity),
-            rfdInterp: interpretRFD(null),
-            timestamp: Date.now(), hipMap: repHipMap
+            rsiInterp, timestamp: Date.now(), hipMap: repHipMap
         };
         b.jumpResults.push(result); STATE.doneReps++;
-
         document.getElementById('telDynamic').innerHTML = `
             <div class="t-row"><span class="t-label">📏 Yükseklik</span><span class="t-value highlight">${jumpHeightCm} cm</span></div>
             <div class="t-row"><span class="t-label">⚡ Zirve Güç</span><span class="t-value">${sayersW} W</span></div>
             <div class="t-row"><span class="t-label">🔄 RSI</span><span class="t-value highlight">${rsi}</span></div>
             <div class="t-row" style="font-size:10px;color:var(--accent-${rsiInterp.color});"><span></span><span>${rsiInterp.label}</span></div>
-            <div class="t-row"><span class="t-label">🦶 Yerde</span><span class="t-value">${Math.round(b.groundContactMs)} ms</span></div>
-            <div class="t-row"><span class="t-label">🚀 İtme Hızı</span><span class="t-value">${pushVelocity} m/s</span></div>
-            <div class="t-row" style="color:var(--accent-amber);font-size:10px;"><span>💥 RFD post-process'te hesaplanacak</span></div>
-            <div class="t-row"><span class="t-label">💨 Uçuş</span><span class="t-value">${flightSec.toFixed(3)} s</span></div>
+            <div class="t-row" style="color:var(--accent-amber);font-size:10px;"><span>💥 RFD post-process'te</span></div>
         `;
-        STATE.metrics.push(`${result.index}. dropjump: ${jumpHeightCm}cm · RSI ${rsi} · ${Math.round(b.groundContactMs)}ms`);
-        speak(`${jumpHeightCm} santim, RSI ${rsi}`);
-
+        STATE.metrics.push(`${result.index}. dropjump: ${jumpHeightCm}cm · RSI ${rsi}`);
         b.isUp = false; b.touched = false; b.stepOffDetected = false;
         b.topH = 0; b.deepestY = 0; b.deepestTime = 0;
         b.baseYLocked = false; b.baselineBuffer = [];
-        b.hipMap = [];
-        b.testStartTime = now;
-
-        updateTelemetry('Drop Jump', 'Hazır', `Tekrar ${STATE.doneReps + 1}/${STATE.goalReps}`);
+        b.hipMap = []; b.testStartTime = now;
         updateProgress();
         if (STATE.doneReps >= STATE.goalReps) { b.finalSummary = computeDropJumpSummary(b); finishMode(STATE.goldStandardEnabled ? 800 : 1500); }
     }
@@ -1543,14 +1827,10 @@ function computeDropJumpSummary(b) {
         bestRSI: +max('rsi').toFixed(2),
         avgGroundContactMs: Math.round(avg('groundContactMs')),
         avgPushVelocity: +avg('pushVelocity').toFixed(2),
-        avgRFD: null,
-        rsiInterp: interpretRSI(avgRSI), pushInterp: interpretPushVelocity(avg('pushVelocity')),
-        rfdInterp: interpretRFD(null),
-        explosiveProfile: interpretExplosiveProfile(avg('pushVelocity'), null, avgRSI),
+        rsiInterp: interpretRSI(avgRSI),
         results: b.jumpResults.slice(),
     };
 }
-
 function calcSquat(lm) {
     const b = STATE.brain.squat;
     const orient = getActiveOrientation();
@@ -1559,9 +1839,7 @@ function calcSquat(lm) {
         const visR = (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0) + (lm[27]?.visibility || 0);
         const visL = (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0) + (lm[28]?.visibility || 0);
         deg = visR >= visL ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
-    } else {
-        deg = (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
-    }
+    } else deg = (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
     const cfg = STATE.brain.load.squat || { mode: 'none', weight: 0, bodyWeight: 75 };
     const userHeightCm = getAthleteHeight();
     const pxc = estimatePixelPerCm(lm, userHeightCm);
@@ -1576,19 +1854,11 @@ function calcSquat(lm) {
             let movedCm = pxToCm(Math.abs((b.bottomHipY || 0) - (b.topHipY || 0)), b.pxPerCm);
             if (movedCm < 5 || movedCm > 120) movedCm = angularROMToCm(180 - b.bestDeg, 0, userHeightCm, 'leg') * 0.5;
             const power = computeRepower({ weightKg: cfg.weight, bodyWeightKg: cfg.bodyWeight, mode: cfg.mode, movedCm, durationMs });
-            const rep = { index: STATE.doneReps + 1, depthDeg: Math.round(b.bestDeg), romCm: Math.round(movedCm), durationSec: +(durationMs / 1000).toFixed(2), loadKg: cfg.mode === 'weighted' ? cfg.weight : 0, loadMode: cfg.mode, power };
-            b.reps = b.reps || []; b.reps.push(rep); STATE.doneReps++;
+            b.reps = b.reps || [];
+            b.reps.push({ index: STATE.doneReps + 1, depthDeg: Math.round(b.bestDeg), romCm: Math.round(movedCm), durationSec: +(durationMs / 1000).toFixed(2), loadKg: cfg.mode === 'weighted' ? cfg.weight : 0, loadMode: cfg.mode, power });
+            STATE.doneReps++;
             b.isDown = false; b.bestDeg = 180; b.bottomHipY = 0;
             if (power) speak(`${Math.round(power.powerW)} watt`);
-            const loadLabel = cfg.mode === 'weighted' ? `${cfg.weight}kg` : 'BW';
-            document.getElementById('telDynamic').innerHTML = `
-                <div class="t-row"><span class="t-label">Derinlik</span><span class="t-value highlight">${rep.depthDeg}°</span></div>
-                <div class="t-row"><span class="t-label">ROM</span><span class="t-value">${rep.romCm} cm</span></div>
-                <div class="t-row"><span class="t-label">Süre</span><span class="t-value">${rep.durationSec}s</span></div>
-                <div class="t-row"><span class="t-label">Yük</span><span class="t-value">${loadLabel}</span></div>
-                ${power ? `<div class="t-row"><span class="t-label">Güç</span><span class="t-value highlight">${power.powerW} W</span></div>` : ''}
-            `;
-            STATE.metrics.push(`${rep.index}. squat: ${rep.depthDeg}° · ${rep.romCm}cm · ${loadLabel}`);
             updateProgress();
             if (STATE.doneReps >= STATE.goalReps) { b.finalSummary = computeSquatSummary(b, cfg); finishMode(1500); }
         }
@@ -1608,10 +1878,8 @@ function computeSquatSummary(b, cfg) {
         avgDuration: +avg('durationSec').toFixed(2), avgPowerW: Math.round(avgP), peakPowerW: Math.round(peak),
         avgPowerPerKg: cfg.bodyWeight ? +(avgP / cfg.bodyWeight).toFixed(2) : 0,
         totalWorkJ: +reps.reduce((s, r) => s + (r.power?.workJ || 0), 0).toFixed(1),
-        loadRatio: cfg.mode === 'weighted' ? +((cfg.weight + cfg.bodyWeight * 0.85) / cfg.bodyWeight).toFixed(2) : 0.85,
     };
 }
-
 function calcPushup(lm) {
     const b = STATE.brain.pushup;
     const orient = getActiveOrientation();
@@ -1620,7 +1888,7 @@ function calcPushup(lm) {
         const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
         const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
         deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
-    } else { deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2; }
+    } else deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
     if (b.pushCooldown > 0) b.pushCooldown--;
     const isDown = deg < 100, isUp = deg > 150;
     updateTelemetry('Dirsek Açısı', `${Math.round(deg)}°`, isDown ? '⬇ Aşağı' : isUp ? '⬆ Yukarı' : '—');
@@ -1634,19 +1902,14 @@ function calcPushup(lm) {
 }
 function calcLunge(lm) {
     const b = STATE.brain.lunge;
-    const orient = getActiveOrientation();
-    if (orient !== 'front' && !b.warnedOrient) { b.warnedOrient = true; STATE.log('⚠️ Lunge için KARŞIDAN önerilir', 'warning'); }
     const kneeR = getAngleDeg(lm[23], lm[25], lm[27]), kneeL = getAngleDeg(lm[24], lm[26], lm[28]);
-    const sym = Math.abs(kneeR - kneeL);
-    updateTelemetry('Diz R/L', `${Math.round(kneeR)}° / ${Math.round(kneeL)}°`, `Simetri: ${Math.round(100 - sym * 1.2)}%`);
+    updateTelemetry('Diz R/L', `${Math.round(kneeR)}° / ${Math.round(kneeL)}°`, '');
     if (!b.isDown && (kneeR < 110 || kneeL < 110)) { b.isDown = true; b.lungeStart = Date.now(); b.bestR = 180; b.bestL = 180; }
     if (b.isDown) {
         if (kneeR < b.bestR) b.bestR = kneeR;
         if (kneeL < b.bestL) b.bestL = kneeL;
         if (kneeR > 140 && kneeL > 140 && (Date.now() - b.lungeStart > 500)) {
-            const a = (b.bestR + b.bestL) / 2;
-            STATE.metrics.push(`${STATE.doneReps + 1}. lunge: ${Math.round(a)}°`); STATE.doneReps++;
-            b.isDown = false; speak('Simetrik'); updateProgress();
+            STATE.doneReps++; b.isDown = false; updateProgress();
             if (STATE.doneReps >= STATE.goalReps) finishMode(1500);
         }
     }
@@ -1654,25 +1917,21 @@ function calcLunge(lm) {
 function calcDeadlift(lm) {
     const b = STATE.brain.deadlift;
     const orient = getActiveOrientation();
-    if (orient !== 'side' && !b.warnedOrient) { b.warnedOrient = true; STATE.log('⚠️ Deadlift için YANDAN gerekli!', 'warning'); }
     let angle;
     if (orient === 'side') {
         const visR = (lm[11]?.visibility || 0) + (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0);
         const visL = (lm[12]?.visibility || 0) + (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0);
         angle = visR >= visL ? getAngleDeg(lm[11], lm[23], lm[25]) : getAngleDeg(lm[12], lm[24], lm[26]);
     } else angle = getAngleDeg(lm[11], lm[23], lm[25]);
-    updateTelemetry('Bel Açısı', `${Math.round(angle)}°`, '');
     if (!b.isDown && angle < 120) { b.isDown = true; b.deadliftStart = Date.now(); }
     if (b.isDown && angle > 160 && (Date.now() - b.deadliftStart > 500)) {
-        STATE.metrics.push(`${STATE.doneReps + 1}. deadlift: ${Math.round(angle)}°`); STATE.doneReps++;
-        b.isDown = false; speak('Tam'); updateProgress();
+        STATE.doneReps++; b.isDown = false; updateProgress();
         if (STATE.doneReps >= STATE.goalReps) finishMode(1500);
     }
 }
 function calcPlank(lm) {
     const b = STATE.brain.plank;
     const orient = getActiveOrientation();
-    if (orient !== 'side' && !b.warnedOrient) { b.warnedOrient = true; STATE.log('⚠️ Plank için YANDAN önerilir', 'warning'); }
     let angle;
     if (orient === 'side') {
         const visR = (lm[11]?.visibility || 0) + (lm[23]?.visibility || 0) + (lm[27]?.visibility || 0);
@@ -1710,7 +1969,6 @@ function getPowerAngle(lm, exercise) {
     }
     return 180;
 }
-const POWER_DIR_THRESHOLD = 0.6, POWER_LAST_REP_MIN = 155, POWER_LAST_REP_MAX = 162;
 function calcPower(lm) {
     const b = STATE.brain.power;
     if (!b || b.exercise === undefined) return;
@@ -1720,29 +1978,24 @@ function calcPower(lm) {
     const angle = b.smoothAngle;
     if (b.lastAngle === undefined) { b.lastAngle = angle; b.phase = 'IDLE'; b.troughAngle = angle; b.peakAngle = angle; b.phaseStart = performance.now(); return; }
     const delta = angle - b.lastAngle;
-    const DIR = POWER_DIR_THRESHOLD;
+    const DIR = 0.6;
     if (angle < b.troughAngle) b.troughAngle = angle;
     if (angle > b.peakAngle) b.peakAngle = angle;
     if (b.phase !== 'IDLE' && (performance.now() - (b.phaseStart || 0)) > 6000) {
-        STATE.log('⚠️ Power testi zaman aşımı', 'warning');
         completePowerRep(b); b.finalSummary = computePowerSummary(b); finishMode(1500); return;
     }
     if (b.phase === 'IDLE') {
-        if (delta < -DIR) { b.phase = 'CONCENTRIC'; b.conStart = performance.now(); b.phaseStart = performance.now(); b.troughAngle = angle; b.peakAngle = angle; }
-        else if (delta > DIR) { b.phase = 'ECCENTRIC'; b.eccStart = performance.now(); b.phaseStart = performance.now(); b.peakAngle = angle; b.troughAngle = angle; }
+        if (delta < -DIR) { b.phase = 'CONCENTRIC'; b.conStart = performance.now(); b.phaseStart = performance.now(); }
+        else if (delta > DIR) { b.phase = 'ECCENTRIC'; b.eccStart = performance.now(); b.phaseStart = performance.now(); }
         b.lastAngle = angle; return;
     }
     if (b.phase === 'CONCENTRIC') {
-        if (delta > DIR) { b.lastConMs = performance.now() - b.conStart; b.phase = 'ECCENTRIC'; b.eccStart = performance.now(); b.phaseStart = performance.now(); b.peakAngle = angle; }
+        if (delta > DIR) { b.lastConMs = performance.now() - b.conStart; b.phase = 'ECCENTRIC'; b.eccStart = performance.now(); b.phaseStart = performance.now(); }
     } else if (b.phase === 'ECCENTRIC') {
-        const isLast = (b.reps.length + 1) >= STATE.goalReps;
-        if (isLast && angle >= POWER_LAST_REP_MIN && angle <= POWER_LAST_REP_MAX) {
-            completePowerRep(b); b.finalSummary = computePowerSummary(b); finishMode(1500); return;
-        }
         if (delta < -DIR) {
             completePowerRep(b);
             if (b.reps.length >= STATE.goalReps) { b.finalSummary = computePowerSummary(b); finishMode(1500); return; }
-            b.phase = 'CONCENTRIC'; b.conStart = performance.now(); b.phaseStart = performance.now(); b.troughAngle = angle; b.peakAngle = angle;
+            b.phase = 'CONCENTRIC'; b.conStart = performance.now(); b.phaseStart = performance.now();
         }
     }
     b.lastAngle = angle;
@@ -1753,21 +2006,10 @@ function completePowerRep(b) {
     const romDeg = Math.max(0, b.peakAngle - b.troughAngle);
     const conVel = romDeg / (conMs / 1000);
     const powerScore = (b.weight * romDeg * conVel) / 1000;
-    const kgPerSec = b.weight / cycleSec;
-    const rep = { index: b.reps.length + 1, conMs: Math.round(conMs), eccMs: Math.round(eccMs), cycleSec: +cycleSec.toFixed(2), romDeg: Math.round(romDeg), conVel: Math.round(conVel), powerScore: +powerScore.toFixed(2), kgPerSec: +kgPerSec.toFixed(2) };
-    b.reps.push(rep);
+    b.reps.push({ index: b.reps.length + 1, conMs: Math.round(conMs), eccMs: Math.round(eccMs), cycleSec: +cycleSec.toFixed(2), romDeg: Math.round(romDeg), conVel: Math.round(conVel), powerScore: +powerScore.toFixed(2), kgPerSec: +(b.weight / cycleSec).toFixed(2) });
     if (powerScore > b.peakScore) b.peakScore = powerScore;
     STATE.doneReps = b.reps.length;
     updateProgress();
-    const avgCycle = (b.reps.reduce((a, r) => a + r.cycleSec, 0) / b.reps.length).toFixed(2);
-    document.getElementById('telDynamic').innerHTML = `
-        <div class="t-row"><span class="t-label">Son Döngü</span><span class="t-value highlight">${rep.cycleSec}s</span></div>
-        <div class="t-row"><span class="t-label">Ort. Döngü</span><span class="t-value">${avgCycle}s</span></div>
-        <div class="t-row"><span class="t-label">Konsantrik</span><span class="t-value">${rep.conMs}ms</span></div>
-        <div class="t-row"><span class="t-label">ROM</span><span class="t-value">${rep.romDeg}°</span></div>
-        <div class="t-row"><span class="t-label">Güç Skoru</span><span class="t-value highlight">${rep.powerScore}</span></div>
-    `;
-    STATE.log(`⚡ Tekrar ${rep.index}: ${rep.cycleSec}s`, 'info');
 }
 function computePowerSummary(b) {
     if (!b.reps.length) return null;
@@ -1782,12 +2024,10 @@ function handleFreePrep(lm) {
     const hipY = (lm[23].y + lm[24].y) / 2;
     b.baseY = b.baseY || hipY;
     b.frames = (b.frames || 0) + 1;
-    const diff = Math.abs(hipY - b.baseY);
-    if (diff > 0.035 && b.frames > 15 && !b.motionDetected) {
+    if (Math.abs(hipY - b.baseY) > 0.035 && b.frames > 15 && !b.motionDetected) {
         b.motionDetected = true;
         document.getElementById('freeRecordWrapper').style.display = 'block';
         document.getElementById('freeStartBtn').disabled = true;
-        STATE.log('🔔 Hareket algılandı', 'info');
         speak('Hareket algılandı, kaydedin.');
     }
 }
@@ -1809,7 +2049,6 @@ function calcFree(lm) {
     updateTelemetry('Serbest', `${rem.toFixed(1)}s`, `Y: %${hipY}`);
     if (elapsed >= b.freeDur) { STATE.metrics.push(`Süre: ${b.freeDur}s`); finishMode(1500); }
 }
-
 function getAngleDeg(a, b, c) {
     if (!a || !b || !c) return 0;
     const r = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
@@ -1829,8 +2068,7 @@ function updateHUD(status) {
     else if (status === 'PREP') { dot.className = 'dot warn'; label.textContent = 'Hazırlanıyor...'; }
     else { dot.className = 'dot'; label.textContent = 'Hazır'; }
 }
-
-const ORIENT_RECOMMENDATION = { jump: 'side', dropjump: 'side', squat: 'side', pushup: 'side', lunge: 'front', deadlift: 'side', plank: 'side', power: 'side', free: 'auto' };
+const ORIENT_RECOMMENDATION = { jump: 'side', dropjump: 'side', squat: 'side', pushup: 'side', lunge: 'front', deadlift: 'side', plank: 'side', power: 'side', free: 'auto', amrap: 'side' };
 function startMode(mode) {
     if (!STATE.cameraReady) { STATE.log('Kamera hazır değil.', 'warning'); openPermOverlay(); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { STATE.log('⚠️ Önce mevcut testi bitirin.', 'warning'); return; }
@@ -1846,15 +2084,10 @@ function startMode(mode) {
                 document.getElementById('dropjumpBodyWeight').value = profile.weight;
             }
         }
-    } else if (mode === 'jump' || mode === 'dropjump') STATE.log('💡 Sporcu seçili değil', 'warning');
-
+    }
     STATE.mode = 'PREP'; STATE.currentMode = mode; STATE.doneReps = 0; STATE.metrics = [];
     STATE.brain[mode] = {}; STATE.finishPending = false;
     if (STATE.finishTimer) { clearTimeout(STATE.finishTimer); STATE.finishTimer = null; }
-    if (STATE.viewOrientation !== 'auto') {
-        const rec = ORIENT_RECOMMENDATION[mode];
-        if (rec && rec !== 'auto' && STATE.viewOrientation !== rec) STATE.log(`💡 ${mode} için önerilen yön: ${rec}`, 'warning');
-    }
     if (['squat', 'deadlift', 'lunge', 'pushup'].includes(mode)) {
         const cfg = readLoadConfig(mode);
         STATE.brain.load[mode] = cfg; STATE.brain[mode].loadCfg = cfg;
@@ -1863,8 +2096,7 @@ function startMode(mode) {
         const b = STATE.brain.power;
         b.exercise = document.getElementById('powerExercise')?.value || 'curl';
         b.weight = parseFloat(document.getElementById('powerWeight')?.value) || 10;
-        b.phase = 'IDLE'; b.reps = []; b.lastAngle = undefined; b.smoothAngle = undefined;
-        b.conStart = 0; b.eccStart = 0; b.lastConMs = 0; b.peakScore = 0;
+        b.phase = 'IDLE'; b.reps = []; b.peakScore = 0;
         b.troughAngle = 180; b.peakAngle = 0;
         STATE.goalReps = parseInt(document.getElementById('powerReps')?.value) || 6;
         speak('Güç testi başlıyor.');
@@ -1931,7 +2163,6 @@ function finishMode(delayMs = 1500) {
         document.getElementById('chartWrap').classList.remove('visible');
     }, delayMs);
 }
-
 function startRecording() {
     if (STATE.isRecording) return;
     try {
@@ -1954,13 +2185,14 @@ function startRecording() {
             const s = Math.floor((Date.now() - STATE.recStartTime) / 1000);
             document.getElementById('recTimer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
         }, 200);
-        STATE.log(`🔴 Kayıt başladı (${mimeType.split(';')[0]})`, 'info');
+        STATE.log(`🔴 Kayıt başladı`, 'info');
     } catch (e) { STATE.log('⚠️ Kayıt hatası: ' + e.message, 'error'); }
 }
 function stopRecording() {
     if (!STATE.isRecording || !STATE.recorder) { finishCleanup(); return; }
     try {
-        if (STATE.currentMode === 'power' && STATE.brain.power?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.power.finalSummary);
+        if (STATE.currentMode === 'amrap' && STATE.brain.amrap?.finalSummary) STATE.metrics = formatAMRAPMetrics(STATE.brain.amrap.finalSummary);
+        else if (STATE.currentMode === 'power' && STATE.brain.power?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.power.finalSummary);
         else if (STATE.currentMode === 'jump' && STATE.brain.jump?.finalSummary) STATE.metrics = formatJumpMetrics(STATE.brain.jump.finalSummary);
         else if (STATE.currentMode === 'dropjump' && STATE.brain.dropjump?.finalSummary) STATE.metrics = formatDropJumpMetrics(STATE.brain.dropjump.finalSummary);
         else if (['squat', 'deadlift', 'lunge'].includes(STATE.currentMode) && STATE.brain[STATE.currentMode]?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain[STATE.currentMode].finalSummary);
@@ -1991,6 +2223,7 @@ function finishCleanup() {
     document.getElementById('freeStartBtn').disabled = false;
     document.getElementById('countdownOverlay').classList.remove('show');
     document.getElementById('countdownOverlay').textContent = '';
+    document.getElementById('amrapOverlay').classList.remove('visible');
     if (STATE.chart) { STATE.chart.data.datasets[0].data = []; STATE.chart.update(); }
     STATE.log('⏸️ Sistem beklemede', 'info');
 }
@@ -2001,7 +2234,8 @@ async function saveRecord(blob) {
         res: STATE.metrics.join(' · '), date: new Date().toLocaleString('tr-TR'),
         videoFile: blob, reps: STATE.doneReps, goal: STATE.goalReps,
         liveEstimate: STATE.currentMode === 'jump' && STATE.brain.jump?.finalSummary ? STATE.brain.jump.finalSummary
-            : STATE.currentMode === 'dropjump' && STATE.brain.dropjump?.finalSummary ? STATE.brain.dropjump.finalSummary : null,
+            : STATE.currentMode === 'dropjump' && STATE.brain.dropjump?.finalSummary ? STATE.brain.dropjump.finalSummary
+            : STATE.currentMode === 'amrap' && STATE.brain.amrap?.finalSummary ? STATE.brain.amrap.finalSummary : null,
         athleteSnapshot: STATE.currentAthlete ? {
             id: STATE.currentAthlete, name: STATE.athletes[STATE.currentAthlete]?.name,
             height: getAthleteHeight(), weight: getAthleteWeight(),
@@ -2042,23 +2276,16 @@ async function saveRecord(blob) {
     } else showToast(`💾 ${sessionRecord.type} kaydedildi`, 'info', 3000);
 
     if ((STATE.currentMode === 'jump' || STATE.currentMode === 'dropjump') && blob && blob.size > 0) {
-        if (STATE.goldStandardEnabled) {
-            enqueuePostProcess(blob, recordId, STATE.currentMode);
-        } else {
-            STATE.log('⚡ Hızlı mod: post-process atlandı', 'info');
-        }
+        if (STATE.goldStandardEnabled) enqueuePostProcess(blob, recordId, STATE.currentMode);
     }
 }
-
 function enqueuePostProcess(videoBlob, recordId, mode) {
     if (STATE.postProcessQueue.length >= STATE.MAX_QUEUE_SIZE) {
-        STATE.log(`⚠️ Kuyruk dolu (${STATE.MAX_QUEUE_SIZE}). Yeni iş alınmadı.`, 'warning');
-        showToast(`⚠️ Kuyruk dolu (${STATE.MAX_QUEUE_SIZE} video).\nMevcut işlemelerin bitmesini bekleyin.\nBu kaydın videosu işlenmeden saklandı.`, 'warning', 7000);
+        STATE.log(`⚠️ Kuyruk dolu`, 'warning');
         return;
     }
     STATE.postProcessQueue.push({ blob: videoBlob, recordId, mode, enqueuedAt: Date.now() });
-    STATE.log(`📥 Kuyruğa eklendi (${STATE.postProcessQueue.length} bekliyor)`, 'info');
-    showToast(`🔬 Video kuyruğa alındı (${STATE.postProcessQueue.length} bekliyor)\nDiğer testleri yapmaya devam edebilirsiniz`, 'info', 3500);
+    showToast(`🔬 Video kuyruğa alındı (${STATE.postProcessQueue.length} bekliyor)`, 'info', 3500);
     updateQueueBadge();
     processNextInQueue();
 }
@@ -2071,11 +2298,9 @@ async function processNextInQueue() {
     updateQueueBadge();
     showPostProcessBadge();
     if (STATE.pauseQueueEnabled) document.getElementById('pauseHudBadge').style.display = 'flex';
-    try {
-        await runPostProcessJob(job.blob, job.recordId, job.mode);
-    } catch (e) {
-        STATE.log('Kuyruk işi hatası: ' + e.message, 'error');
-    } finally {
+    try { await runPostProcessJob(job.blob, job.recordId, job.mode); }
+    catch (e) { STATE.log('Kuyruk işi hatası: ' + e.message, 'error'); }
+    finally {
         STATE.postProcessing = false;
         STATE.activePostProcess = null;
         document.getElementById('pauseHudBadge').style.display = 'none';
@@ -2104,7 +2329,6 @@ function updateQueueBadge() {
         else hud.style.display = 'none';
     }
 }
-
 function findStableBaseline(hipYHistory, fps) {
     const winSize = Math.max(8, Math.round(fps * 0.5));
     const searchLimit = Math.min(hipYHistory.length - winSize, Math.round(fps * 3));
@@ -2119,48 +2343,31 @@ function findStableBaseline(hipYHistory, fps) {
     }
     const baseWin = hipYHistory.slice(bestIdx, bestIdx + winSize).filter(v => v !== null && !isNaN(v));
     if (baseWin.length < 5) return null;
-    const baseY = baseWin.reduce((a, b) => a + b, 0) / baseWin.length;
-    STATE.log(`🔬 Baseline: pencere #${bestIdx}`, 'info');
-    return baseY;
+    return baseWin.reduce((a, b) => a + b, 0) / baseWin.length;
 }
-
 async function runPostProcessJob(videoBlob, recordId, mode) {
     const ppSub = document.getElementById('ppSub');
     const ppFill = document.getElementById('ppFill');
     let url = null;
     if (ppFill) ppFill.style.width = '0%';
-    if (ppSub) ppSub.textContent = 'Video yükleniyor...';
-    STATE.log(`🔬 Altın standart analiz: ${mode}`, 'info');
-
     try {
         url = URL.createObjectURL(videoBlob);
         const tempVideo = document.createElement('video');
         tempVideo.src = url; tempVideo.muted = true; tempVideo.playsInline = true;
-
-        await new Promise((resolve, reject) => {
-            tempVideo.onloadedmetadata = resolve;
-            tempVideo.onerror = reject;
-            setTimeout(reject, 10000);
-        });
-
+        await new Promise((resolve, reject) => { tempVideo.onloadedmetadata = resolve; tempVideo.onerror = reject; setTimeout(reject, 10000); });
         const detectedFps = await detectVideoFps(tempVideo);
         const useFps = Math.max(30, Math.min(120, detectedFps));
         const frameDuration = 1 / useFps;
         const totalFrames = Math.round(tempVideo.duration * useFps);
-        if (ppSub) ppSub.textContent = `${useFps}fps · ${totalFrames} kare`;
-
         const hipYHistory = [];
         const ppPose = new Pose({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
-        ppPose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.4, enableSegmentation: false });
-
+        ppPose.setOptions({ modelComplexity: 1, smoothLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.4 });
         const offCanvas = document.createElement('canvas');
         offCanvas.width = tempVideo.videoWidth || 640;
         offCanvas.height = tempVideo.videoHeight || 480;
         const offCtx = offCanvas.getContext('2d');
-
         let pendingResolve = null;
         ppPose.onResults((res) => { if (pendingResolve) { const fn = pendingResolve; pendingResolve = null; fn(res); } });
-
         for (let f = 0; f < totalFrames; f++) {
             tempVideo.currentTime = f * frameDuration;
             await new Promise(r => tempVideo.onseeked = r);
@@ -2171,25 +2378,17 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
                 setTimeout(() => { if (pendingResolve) { const fn = pendingResolve; pendingResolve = null; fn({ poseLandmarks: null }); } }, 500);
             });
             let hipY = null;
-            if (res.poseLandmarks && res.poseLandmarks[23] && res.poseLandmarks[24]) {
-                hipY = (res.poseLandmarks[23].y + res.poseLandmarks[24].y) / 2;
-            }
+            if (res.poseLandmarks && res.poseLandmarks[23] && res.poseLandmarks[24]) hipY = (res.poseLandmarks[23].y + res.poseLandmarks[24].y) / 2;
             hipYHistory.push(hipY);
             const pct = Math.round(((f + 1) / totalFrames) * 100);
             if (ppFill) ppFill.style.width = pct + '%';
-            if (f % 5 === 0 && ppSub) ppSub.textContent = `${pct}% (${f + 1}/${totalFrames})`;
+            if (f % 5 === 0 && ppSub) ppSub.textContent = `${pct}%`;
         }
         try { ppPose.close(); } catch (_) {}
-
         const baseY = findStableBaseline(hipYHistory, useFps);
         if (baseY === null) throw new Error('Baseline tespit edilemedi');
-
         const userHeight = getAthleteHeight();
-        const hipCmHistory = hipYHistory.map((y, i) => ({
-            t: i * frameDuration * 1000,
-            cm: y !== null ? +((baseY - y) * userHeight * 0.92).toFixed(2) : null
-        }));
-
+        const hipCmHistory = hipYHistory.map((y, i) => ({ t: i * frameDuration * 1000, cm: y !== null ? +((baseY - y) * userHeight * 0.92).toFixed(2) : null }));
         const TAKEOFF_TH = 0.045, LANDING_TH = 0.015;
         let takeoffFrame = -1, landingFrame = -1, topH = 0, pushStartFrame = 0;
         for (let i = 0; i < hipYHistory.length; i++) {
@@ -2207,7 +2406,6 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
             if (takeoffFrame !== -1 && diff < LANDING_TH && i > takeoffFrame + 5) { landingFrame = i; break; }
         }
         if (takeoffFrame === -1 || landingFrame === -1) throw new Error('Uçuş tespit edilemedi');
-
         const flightFrames = landingFrame - takeoffFrame;
         const flightTimeSec = flightFrames / useFps;
         const jumpHeightCm = computeJumpHeightFromFlight(flightTimeSec);
@@ -2217,19 +2415,14 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
         const powerPerKg = bodyWeight ? +(sayersPowerW / bodyWeight).toFixed(2) : 0;
         const trochanterCm = Math.round(topH * userHeight * 0.92);
         const chainEfficiency = jumpHeightCm > 0 ? +((trochanterCm / jumpHeightCm) * 100).toFixed(1) : 0;
-
         const samozino = computeSamozinoPower({ bodyWeightKg: bodyWeight, jumpHeightCm, pushOffDistanceCm: trochanterCm, pushOffTimeMs: pushOffMs });
         const pushVelocity = computePushVelocity(jumpHeightCm, pushOffMs);
-
         let rfd = null, groundContactMs = null, touchFrame = -1;
-
         if (mode === 'dropjump') {
             let bestTouch = -1, deepestY = -Infinity;
             for (let i = Math.max(0, takeoffFrame - Math.round(useFps * 1.5)); i < takeoffFrame; i++) {
-                const y = hipYHistory[i];
-                if (y === null || isNaN(y)) continue;
-                const diffBelow = y - baseY;
-                if (diffBelow < 0.02) continue;
+                const y = hipYHistory[i]; if (y === null || isNaN(y)) continue;
+                if (y - baseY < 0.02) continue;
                 if (y > deepestY) { deepestY = y; bestTouch = i; }
             }
             if (bestTouch > 0) {
@@ -2241,104 +2434,34 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
             if (touchFrame > 0 && takeoffFrame > touchFrame) {
                 groundContactMs = ((takeoffFrame - touchFrame) / useFps) * 1000;
                 if (groundContactMs > 30 && groundContactMs < 1500) {
-                    const rsi = computeRSI(jumpHeightCm, groundContactMs);
                     rfd = computeRFD({ hipMap: hipCmHistory, bodyWeightKg: bodyWeight, analysisStartFrame: touchFrame, analysisEndFrame: takeoffFrame, fps: useFps });
-                    const rsiInterp = interpretRSI(rsi);
-                    const rfdInterp = interpretRFD(rfd?.rfdNsPerKg);
-                    const pushInterp = interpretPushVelocity(pushVelocity);
-                    const chainInterp = interpretChain(chainEfficiency);
-                    const explosiveProfile = interpretExplosiveProfile(pushVelocity, rfd?.rfdNsPerKg, rsi);
-                    const lowFpsWarn = useFps < 45 || (STATE.actualCameraFps && STATE.actualCameraFps < 45);
-
-                    const refinedResult = {
-                        jumpHeightCm, trochanterCm, sayersPowerW,
-                        samozinoPowerW: samozino?.peakPowerW || null,
-                        powerPerKg, chainEfficiency,
-                        flightTimeSec: +flightTimeSec.toFixed(3), flightFrames, fps: useFps, bodyWeightKg: bodyWeight,
-                        pushOffMs: Math.round(pushOffMs), pushVelocity, pushInterp,
-                        rfdNs: rfd?.rfdNs || null, rfdNsPerKg: rfd?.rfdNsPerKg || null, rfdInterp,
-                        rsi, rsiInterp, groundContactMs: Math.round(groundContactMs),
-                        chainInterp, explosiveProfile, lowFpsWarn,
-                        hipMap: downsampleHipMap(hipCmHistory, 3),
-                        refined: true, processedAt: Date.now(),
-                    };
-                    await updateRecordWithRefinedData(recordId, refinedResult);
-                    showToast(buildRefinedToast(refinedResult, mode), 'success', 9000);
-                    STATE.log(`🏆 ${mode}: ${jumpHeightCm}cm · RSI ${rsi} · ${Math.round(groundContactMs)}ms`, 'success');
-                    return refinedResult;
                 }
             }
-            const pushInterp = interpretPushVelocity(pushVelocity);
-            const chainInterp = interpretChain(chainEfficiency);
-            const refinedResult = {
-                jumpHeightCm, trochanterCm, sayersPowerW,
-                samozinoPowerW: samozino?.peakPowerW || null,
-                powerPerKg, chainEfficiency,
-                flightTimeSec: +flightTimeSec.toFixed(3), flightFrames, fps: useFps, bodyWeightKg: bodyWeight,
-                pushOffMs: Math.round(pushOffMs), pushVelocity, pushInterp,
-                rfdNs: null, rfdNsPerKg: null, rfdInterp: interpretRFD(null),
-                rsi: null, rsiInterp: interpretRSI(null), groundContactMs: null,
-                chainInterp, explosiveProfile: interpretExplosiveProfile(pushVelocity, null, null),
-                lowFpsWarn: useFps < 45,
-                hipMap: downsampleHipMap(hipCmHistory, 3),
-                refined: true, processedAt: Date.now(),
-                warning: 'RSI hesaplanamadı (yer teması tespit edilemedi)',
-            };
-            await updateRecordWithRefinedData(recordId, refinedResult);
-            showToast(`⚠️ ${mode}: RSI hesaplanamadı\nSıçrama: ${jumpHeightCm}cm · Güç: ${sayersPowerW}W`, 'warning', 6000);
-            return refinedResult;
         } else {
             const analysisStart = Math.max(0, takeoffFrame - Math.round(150 * useFps / 1000));
             rfd = computeRFD({ hipMap: hipCmHistory, bodyWeightKg: bodyWeight, analysisStartFrame: analysisStart, analysisEndFrame: takeoffFrame, fps: useFps });
         }
-
-        const pushInterp = interpretPushVelocity(pushVelocity);
-        const rfdInterp = interpretRFD(rfd?.rfdNsPerKg);
-        const chainInterp = interpretChain(chainEfficiency);
-        const explosiveProfile = interpretExplosiveProfile(pushVelocity, rfd?.rfdNsPerKg, null);
-        const lowFpsWarn = useFps < 45 || (STATE.actualCameraFps && STATE.actualCameraFps < 45);
-
         const refinedResult = {
-            jumpHeightCm, trochanterCm, sayersPowerW,
-            samozinoPowerW: samozino?.peakPowerW || null,
-            powerPerKg, chainEfficiency,
-            flightTimeSec: +flightTimeSec.toFixed(3), flightFrames, fps: useFps, bodyWeightKg: bodyWeight,
-            pushOffMs: Math.round(pushOffMs), pushVelocity, pushInterp,
-            rfdNs: rfd?.rfdNs || null, rfdNsPerKg: rfd?.rfdNsPerKg || null, rfdInterp,
-            rsi: null, rsiInterp: null, groundContactMs: null,
-            chainInterp, explosiveProfile, lowFpsWarn,
+            jumpHeightCm, trochanterCm, sayersPowerW, powerPerKg, chainEfficiency,
+            flightTimeSec: +flightTimeSec.toFixed(3), fps: useFps, bodyWeightKg: bodyWeight,
+            pushOffMs: Math.round(pushOffMs), pushVelocity,
+            rfdNs: rfd?.rfdNs || null, rfdNsPerKg: rfd?.rfdNsPerKg || null,
+            rsi: groundContactMs ? computeRSI(jumpHeightCm, groundContactMs) : null,
+            groundContactMs: groundContactMs ? Math.round(groundContactMs) : null,
             hipMap: downsampleHipMap(hipCmHistory, 3),
             refined: true, processedAt: Date.now(),
         };
         await updateRecordWithRefinedData(recordId, refinedResult);
-        showToast(buildRefinedToast(refinedResult, mode), 'success', 9000);
-        STATE.log(`🏆 ${mode}: ${jumpHeightCm}cm · ${trochanterCm}cm (%${chainEfficiency}) · ${sayersPowerW}W`, 'success');
-        return refinedResult;
+        showToast(`🏆 Altın standart hazır: ${jumpHeightCm}cm · ${sayersPowerW}W`, 'success', 6000);
     } catch (err) {
         STATE.log('⚠️ Video işleme hatası: ' + err.message, 'error');
-        showToast('⚠️ Video işleme başarısız: ' + err.message, 'warning', 5000);
-        return null;
     } finally {
         if (url) try { URL.revokeObjectURL(url); } catch (_) {}
     }
 }
-
 function downsampleHipMap(hipMap, factor = 3) {
     if (!hipMap || hipMap.length < factor) return hipMap;
     return hipMap.filter((_, i) => i % factor === 0);
-}
-function buildRefinedToast(r, mode) {
-    let msg = `🏆 ${mode === 'dropjump' ? 'DROP JUMP' : 'ALTIN STANDART'} HAZIR\n`;
-    msg += `📏 Sıçrama: ${r.jumpHeightCm} cm\n`;
-    msg += `🔗 Kinetik: ${r.trochanterCm} cm (%${r.chainEfficiency})\n`;
-    msg += `⚡ Güç: ${r.sayersPowerW} W\n`;
-    msg += `🚀 İtme Hızı: ${r.pushVelocity} m/s\n`;
-    if (r.rfdNsPerKg) msg += `💥 RFD: ${r.rfdNsPerKg} N/s/kg\n`;
-    if (r.rsi) msg += `🔄 RSI: ${r.rsi}\n`;
-    if (r.rsi && r.groundContactMs) msg += `🦶 Yerde: ${r.groundContactMs} ms\n`;
-    msg += `📊 ${r.explosiveProfile?.label || ''}`;
-    if (r.lowFpsWarn) msg += `\n⚠️ Düşük FPS — sonuçlar temkinli yorumlanmalı`;
-    return msg;
 }
 async function detectVideoFps(videoEl) {
     if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
@@ -2380,8 +2503,8 @@ async function updateRecordWithRefinedData(recordId, refined) {
         }
         renderHistory();
         if (STATE.currentAthlete) renderSessions();
-        STATE.log('✅ Kayıt refined veri ile güncellendi', 'success');
-    } catch (e) { STATE.log('⚠️ Kayıt güncelleme hatası: ' + e.message, 'error'); }
+        STATE.log('✅ Refined veri güncellendi', 'success');
+    } catch (e) { STATE.log('⚠️ Güncelleme hatası: ' + e.message, 'error'); }
 }
 function formatJumpMetrics(s) {
     if (!s) return ['Veri yok'];
@@ -2432,10 +2555,26 @@ function formatDropJumpMetrics(s) {
         `🔄 RSI: ${s.avgRSI} (En iyi: ${s.bestRSI})`,
         `⚡ Güç: ${s.avgSayersPower} W`,
         `🦶 Yerde: ${s.avgGroundContactMs} ms`,
-        `💥 RFD: post-process bekleniyor`,
     ];
 }
-
+function formatPowerMetrics(s) {
+    if (!s) return ['Veri yok'];
+    if (s.exercise === 'amrap') return formatAMRAPMetrics(s);
+    if (s.exercise === 'jump' && s.refined) return formatJumpMetrics(s);
+    if (s.exercise === 'dropjump') return formatDropJumpMetrics(s);
+    if (s.avgCycle !== undefined) return [
+        `Ağırlık: ${s.weight}kg`, `Ort. Döngü: ${s.avgCycle}s`,
+        `Ort. Konsantrik: ${s.avgCon}ms`, `Ort. Eksantrik: ${s.avgEcc}ms`,
+        `Peak Güç: ${s.peakPower} W`, `Ort. Güç: ${s.avgPower} W`,
+    ];
+    if (['squat', 'deadlift', 'lunge'].includes(s.exercise)) return [
+        `Yük: ${s.loadMode === 'weighted' ? s.loadKg + 'kg' : 'BW'}`,
+        `Derinlik: ${s.avgDepth}°`, `ROM: ${s.avgRomCm}cm`,
+        `Süre: ${s.avgDuration}s`, `Ort. Güç: ${s.avgPowerW} W`,
+        `Peak: ${s.peakPowerW} W`, `W/kg: ${s.avgPowerPerKg}`,
+    ];
+    return ['Veri yok'];
+}
 function drawHipMap(canvasEl, hipMap) {
     if (!canvasEl || !hipMap || hipMap.length < 3) return;
     const ctx = canvasEl.getContext('2d');
@@ -2471,10 +2610,7 @@ function drawHipMap(canvasEl, hipMap) {
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace';
         ctx.fillText(`${peak.cm.toFixed(1)}cm`, Math.min(x + 5, W - 40), Math.max(y - 5, 10));
     }
-    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '9px monospace';
-    ctx.fillText(`${(maxT / 1000).toFixed(2)}s`, 4, H - 4);
 }
-
 function toggleHistory() {
     const p = document.getElementById('historyPanel');
     p.classList.toggle('open');
@@ -2487,21 +2623,29 @@ async function renderHistory() {
         if (STATE.db) {
             const tx = STATE.db.transaction('records', 'readonly');
             items = await new Promise(r => { const q = tx.objectStore('records').getAll(); q.onsuccess = () => r(q.result); }) || [];
-        } else {
-            const raw = localStorage.getItem('azythos_records');
-            items = raw ? JSON.parse(raw) : [];
         }
     } catch (_) { items = []; }
-    if (!items?.length) {
-        list.innerHTML = `<div class="empty-history"><span class="big-icon">📭</span>Henüz kayıtlı analiz yok.</div>`;
-        return;
-    }
+    if (!items?.length) { list.innerHTML = `<div class="empty-history"><span class="big-icon">📭</span>Henüz kayıtlı analiz yok.</div>`; return; }
     const sorted = items.slice().reverse();
     list.innerHTML = sorted.map((item) => {
         const live = item.liveEstimate, refined = item.refined, snap = item.athleteSnapshot;
+        const isAMRAP = item.type === 'AMRAP';
         const isJump = item.type === 'JUMP', isDrop = item.type === 'DROPJUMP';
         const canRetry = (isJump || isDrop) && !refined && item.videoFile && item.goldStandardUsed !== false;
         const hasVideo = !!item.videoFile;
+
+        let amrapBlock = '';
+        if (isAMRAP && live) {
+            const f = live.fatigue;
+            amrapBlock = `<div class="dev-panel amrap-data">
+                <div style="color:#8b5cf6;font-size:10px;margin-bottom:6px;font-weight:800;">🎯 SINIRSIZ ANALİZ</div>
+                <div class="dev-row"><span>Toplam</span><span class="dev-up">${live.totalReps} tekrar</span></div>
+                <div class="dev-row"><span>Süre</span><span>${live.totalSec}s</span></div>
+                <div class="dev-row"><span>Tempo</span><span>${live.tempo}/dk</span></div>
+                ${f ? `<div class="dev-row"><span>Yorgunluk</span><span class="dev-${f.color === 'rose' ? 'down' : f.color === 'emerald' ? 'up' : 'flat'}">%${f.index} — ${f.label}</span></div>` : ''}
+                ${live.useLimit ? `<div class="dev-row"><span>🔒 Limit</span><span>${live.limitReps} tekrar</span></div>` : ''}
+            </div>`;
+        }
 
         let jumpBlock = '';
         if ((isJump || isDrop) && (live || refined)) {
@@ -2509,35 +2653,26 @@ async function renderHistory() {
             if (refined) {
                 const interp = refined.explosiveProfile || refined.rsiInterp || refined.chainInterp;
                 jumpBlock += `
-                    <div style="color:var(--accent-amber);font-size:10px;margin-bottom:6px;font-weight:800;">
-                        🏆 ALTIN STANDART (${refined.fps}fps)${refined.lowFpsWarn ? ' <span class="fps-warn">⚠️ DÜŞÜK FPS</span>' : ''}
-                    </div>
+                    <div style="color:var(--accent-amber);font-size:10px;margin-bottom:6px;font-weight:800;">🏆 ALTIN STANDART (${refined.fps}fps)${refined.lowFpsWarn ? ' <span class="fps-warn">⚠️ DÜŞÜK FPS</span>' : ''}</div>
                     <div class="dev-row"><span>📏 Sıçrama</span><span class="dev-up">${refined.jumpHeightCm} cm</span></div>
                     <div class="dev-row"><span>🔗 Kinetik</span><span class="dev-up">${refined.trochanterCm} cm (%${refined.chainEfficiency})</span></div>
                     <div class="dev-row"><span>⚡ Güç</span><span class="dev-up">${refined.sayersPowerW} W</span></div>
-                    <div class="dev-row"><span>🚀 İtme</span><span>${refined.pushVelocity} m/s</span></div>
                     ${refined.rfdNsPerKg ? `<div class="dev-row"><span>💥 RFD</span><span>${refined.rfdNsPerKg} N/s/kg</span></div>` : ''}
                     ${refined.rsi ? `<div class="dev-row"><span>🔄 RSI</span><span class="dev-up">${refined.rsi}</span></div>` : ''}
-                    ${refined.warning ? `<div class="dev-row" style="color:var(--accent-amber);font-size:10px;"><span>⚠️ ${escapeHtml(refined.warning)}</span></div>` : ''}
-                    <div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.1);font-size:11px;color:var(--accent-${interp?.color || 'emerald'});font-weight:700;">📊 ${escapeHtml(interp?.label || '')}</div>
                     ${refined.hipMap ? `<div class="hipmap-container" data-hipmap-id="${item.id}"><canvas class="hipmap-canvas"></canvas><div class="hipmap-legend"><div class="lg"><span class="lg-dot" style="background:#8b5cf6;"></span>Ön</div><div class="lg"><span class="lg-dot" style="background:#fbbf24;"></span>İtiş</div><div class="lg"><span class="lg-dot" style="background:#22d3ee;"></span>Uçuş</div><div class="lg"><span class="lg-dot" style="background:#f43f5e;"></span>Zirve</div></div></div>` : ''}
                 `;
             } else if (live) {
-                const gsUsed = item.goldStandardUsed;
                 jumpBlock += `
-                    <div style="color:var(--accent-amber);font-size:10px;margin-bottom:6px;font-weight:700;">
-                        ⚡ CANLI · <span style="color:var(--text-dim);">${gsUsed === false ? '⚡ hızlı mod' : '🔬 video işleniyor...'}</span>
-                    </div>
+                    <div style="color:var(--accent-amber);font-size:10px;margin-bottom:6px;font-weight:700;">⚡ CANLI</div>
                     <div class="dev-row"><span>📏 Sıçrama</span><span>${live.avgJumpCm} cm</span></div>
                     <div class="dev-row"><span>⚡ Güç</span><span>${live.avgPeakPower} W</span></div>
-                    ${live.avgRSI ? `<div class="dev-row"><span>🔄 RSI</span><span>${live.avgRSI}</span></div>` : ''}
                 `;
             }
             jumpBlock += `</div>`;
         }
         let snapBlock = snap ? `<div style="font-size:10px;color:var(--text-dim);margin-top:4px;">👤 ${escapeHtml(snap.name)} · ${snap.height}cm · ${snap.weight}kg</div>` : '';
         let fpsBlock = item.cameraFpsAtCapture && (isJump || isDrop) ? `<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📹 ${item.cameraFpsAtCapture}fps</div>` : '';
-        let videoWarn = !hasVideo && item.videoDeleted ? `<div style="font-size:10px;color:var(--accent-amber);margin-top:2px;">🗑️ Video temizlendi (30+ gün)</div>` : '';
+        let videoWarn = !hasVideo && item.videoDeleted ? `<div style="font-size:10px;color:var(--accent-amber);margin-top:2px;">🗑️ Video temizlendi</div>` : '';
 
         return `
             <div class="history-item" role="listitem">
@@ -2546,7 +2681,7 @@ async function renderHistory() {
                     <span class="hi-date">${escapeHtml(item.date || '—')}</span>
                 </div>
                 <div class="hi-res">${escapeHtml(item.res || 'Veri yok')}</div>
-                ${jumpBlock}${snapBlock}${fpsBlock}${videoWarn}
+                ${amrapBlock}${jumpBlock}${snapBlock}${fpsBlock}${videoWarn}
                 <div class="hi-actions" style="margin-top:10px;">
                     ${hasVideo ? `<button class="btn btn-sm btn-blue" onclick="openPlayer(${item.id})">▶ Oynat</button>` : ''}
                     ${canRetry ? `<button class="btn btn-sm btn-amber" onclick="retryPostProcess(${item.id})">🔬 Yeniden İşle</button>` : ''}
@@ -2565,30 +2700,23 @@ async function renderHistory() {
     }, 100);
 }
 async function retryPostProcess(id) {
-    if (!STATE.db) { showToast('DB yok', 'warning'); return; }
+    if (!STATE.db) return;
     try {
         const tx = STATE.db.transaction('records', 'readonly');
         const rec = await new Promise(r => { const q = tx.objectStore('records').get(id); q.onsuccess = () => r(q.result); });
         if (!rec?.videoFile) { showToast('Video bulunamadı', 'warning'); return; }
         const mode = rec.type === 'DROPJUMP' ? 'dropjump' : 'jump';
-        STATE.log(`🔬 Yeniden işleme: #${id} (${mode})`, 'info');
         enqueuePostProcess(rec.videoFile, id, mode);
     } catch (e) { STATE.log('Retry hatası: ' + e.message, 'error'); }
 }
 async function openPlayer(id) {
     let item = null;
     try {
-        if (STATE.db) {
-            const tx = STATE.db.transaction('records', 'readonly');
-            item = await new Promise(r => { const q = tx.objectStore('records').get(id); q.onsuccess = () => r(q.result); });
-        } else {
-            const raw = localStorage.getItem('azythos_records');
-            item = (raw ? JSON.parse(raw) : []).find(x => x.id === id);
-        }
+        const tx = STATE.db.transaction('records', 'readonly');
+        item = await new Promise(r => { const q = tx.objectStore('records').get(id); q.onsuccess = () => r(q.result); });
     } catch (_) { item = null; }
-    if (!item?.videoFile) { STATE.log('Video bulunamadı!', 'error'); return; }
-    const url = URL.createObjectURL(item.videoFile);
-    playVid.src = url;
+    if (!item?.videoFile) return;
+    playVid.src = URL.createObjectURL(item.videoFile);
     document.getElementById('playerModal').classList.add('open');
     setSpeed(1.0);
     playVid.play();
@@ -2599,15 +2727,8 @@ function closePlayer() {
     playVid.pause();
     if (playVid.src) { try { URL.revokeObjectURL(playVid.src); } catch (_) {} playVid.src = ''; }
 }
-function togglePlayback() {
-    if (playVid.paused) { playVid.play(); playBtn.textContent = '⏸'; }
-    else { playVid.pause(); playBtn.textContent = '▶'; }
-}
-function seekFrame(val) {
-    playVid.pause();
-    playVid.currentTime = Math.max(0, Math.min(playVid.duration || 0, playVid.currentTime + val));
-    playBtn.textContent = '▶';
-}
+function togglePlayback() { if (playVid.paused) { playVid.play(); playBtn.textContent = '⏸'; } else { playVid.pause(); playBtn.textContent = '▶'; } }
+function seekFrame(val) { playVid.pause(); playVid.currentTime = Math.max(0, Math.min(playVid.duration || 0, playVid.currentTime + val)); playBtn.textContent = '▶'; }
 function setSpeed(s) {
     playVid.playbackRate = s;
     document.querySelectorAll('#playerModal .right .btn').forEach(b => { b.style.background = 'transparent'; b.style.color = 'var(--text-secondary)'; });
@@ -2618,18 +2739,11 @@ function setSpeed(s) {
 async function deleteRecord(id) {
     if (!confirm('Bu analizi silmek istediğinize emin misiniz?')) return;
     try {
-        if (STATE.db) {
-            const tx = STATE.db.transaction('records', 'readwrite');
-            tx.objectStore('records').delete(id);
-            await new Promise(r => tx.oncomplete = r);
-        } else {
-            const raw = localStorage.getItem('azythos_records');
-            let list = raw ? JSON.parse(raw) : [];
-            list = list.filter(x => x.id !== id);
-            localStorage.setItem('azythos_records', JSON.stringify(list));
-        }
+        const tx = STATE.db.transaction('records', 'readwrite');
+        tx.objectStore('records').delete(id);
+        await new Promise(r => tx.oncomplete = r);
         renderHistory();
-    } catch (e) { STATE.log('Silme hatası: ' + e.message, 'error'); }
+    } catch (e) { STATE.log('Silme hatası', 'error'); }
 }
 function exportData() {
     const tx = STATE.db?.transaction('records', 'readonly');
@@ -2643,19 +2757,13 @@ function exportData() {
             a.click(); URL.revokeObjectURL(url);
             showToast('📤 Dışa aktarıldı', 'success');
         };
-    } else STATE.log('Veri yok', 'error');
+    }
 }
 function clearAllData() {
     if (!confirm('Tüm verileri silmek istediğinize emin misiniz?')) return;
-    if (STATE.db) {
-        const tx = STATE.db.transaction('records', 'readwrite');
-        tx.objectStore('records').clear();
-        tx.oncomplete = () => { renderHistory(); speak('Veriler temizlendi.'); showToast('🗑 Temizlendi', 'success'); };
-    } else {
-        localStorage.removeItem('azythos_records');
-        renderHistory();
-        showToast('🗑 Temizlendi', 'success');
-    }
+    const tx = STATE.db.transaction('records', 'readwrite');
+    tx.objectStore('records').clear();
+    tx.oncomplete = () => { renderHistory(); showToast('🗑 Temizlendi', 'success'); };
 }
 function initChart() {
     const c = document.getElementById('liveChartCanvas');
@@ -2674,23 +2782,6 @@ function pushChartData(val) {
     STATE.chart.data.datasets[0].data = STATE.chartData;
     STATE.chart.update('none');
 }
-function formatPowerMetrics(s) {
-    if (!s) return ['Veri yok'];
-    if (s.exercise === 'jump' && s.refined) return formatJumpMetrics(s);
-    if (s.exercise === 'dropjump') return formatDropJumpMetrics(s);
-    if (s.avgCycle !== undefined) return [
-        `Ağırlık: ${s.weight}kg`, `Ort. Döngü: ${s.avgCycle}s`, `Ort. Konsantrik: ${s.avgCon}ms`,
-        `Ort. Eksantrik: ${s.avgEcc}ms`, `Peak Güç: ${s.peakPower} W`, `Ort. Güç: ${s.avgPower} W`,
-        `Peak Hız: ${s.peakKgPerSec} kg/s`, `Yorgunluk: %${s.fatigueIndex}`,
-    ];
-    if (['squat', 'deadlift', 'lunge'].includes(s.exercise)) return [
-        `Yük: ${s.loadMode === 'weighted' ? s.loadKg + 'kg' : 'BW'}`, `Derinlik: ${s.avgDepth}°`,
-        `ROM: ${s.avgRomCm}cm`, `Süre: ${s.avgDuration}s`, `Ort. Güç: ${s.avgPowerW} W`,
-        `Peak: ${s.peakPowerW} W`, `W/kg: ${s.avgPowerPerKg}`, `İş: ${s.totalWorkJ} J`,
-    ];
-    return ['Veri yok'];
-}
-
 function loadAthletes() {
     try {
         const raw = localStorage.getItem('azythos_athletes');
@@ -2706,7 +2797,7 @@ function closeAthletes() { document.getElementById('athletesPanel').classList.re
 function createAthlete() {
     const input = document.getElementById('newAthleteName');
     const name = (input.value || '').trim();
-    if (!name) { STATE.log('İsim girin', 'warning'); return; }
+    if (!name) { showToast('İsim girin', 'warning'); return; }
     const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now().toString(36);
     STATE.athletes[id] = {
         id, name, created: Date.now(),
@@ -2714,7 +2805,6 @@ function createAthlete() {
         sessions: []
     };
     saveAthletes(); input.value = ''; renderAthletes();
-    STATE.log(`👤 ${name} eklendi`, 'success');
     showToast(`👤 ${escapeHtml(name)} oluşturuldu`, 'success', 3000);
 }
 function renderAthletes() {
@@ -2731,7 +2821,7 @@ function renderAthletes() {
                 </div>
                 <div class="hi-res">
                     ${p.height ? `📏 ${p.height}cm` : ''} ${p.weight ? `· ⚖️ ${p.weight}kg` : ''}
-                    ${p.position ? `· ⚽ ${escapeHtml(p.position)}` : ''} ${p.dominantFoot ? `· 🦶 ${escapeHtml(p.dominantFoot)}` : ''}
+                    ${p.position ? `· ⚽ ${escapeHtml(p.position)}` : ''}
                 </div>
                 <div class="hi-res" style="margin-top:4px;">${a.sessions.length} oturum · ${a.sessions.reduce((s, x) => s + (x.tests?.length || 0), 0)} test</div>
                 <div class="hi-actions">
@@ -2746,21 +2836,13 @@ function deleteAthlete(id) {
     if (!confirm('Sporcuyu ve tüm testlerini silmek istediğinize emin misiniz?')) return;
     delete STATE.athletes[id]; saveAthletes(); renderAthletes();
     if (STATE.currentAthlete === id) {
-        STATE.currentAthlete = null;
-        STATE.currentSessionId = null;
-        STATE.sessionBuffer = [];
+        STATE.currentAthlete = null; STATE.currentSessionId = null; STATE.sessionBuffer = [];
     }
 }
-
-// ✅ v9.9 FIX 7 + FIX 8: Sporcu değişiminde session sıfırla + sidebar senkronizasyonu
 function openAthleteDetail(id) {
     const a = STATE.athletes[id];
     if (!a) return;
-    // FIX 7: Farklı sporcuya geçildiyse oturumu sıfırla
     if (STATE.currentAthlete !== id) {
-        if (STATE.currentSessionId) {
-            STATE.log(`🔄 Sporcu değişti, oturum sıfırlandı`, 'info');
-        }
         STATE.currentSessionId = null;
         STATE.sessionBuffer = [];
     }
@@ -2768,7 +2850,6 @@ function openAthleteDetail(id) {
     document.getElementById('athleteDetailTitle').innerHTML = `👤 <span>${escapeHtml(a.name)}</span> <small style="font-size:12px;color:var(--text-dim);font-weight:400;">· ${a.sessions.length} oturum</small>`;
     renderProfileCard(); renderSessions(); closeAthletes();
     document.getElementById('athleteDetailPanel').classList.add('open');
-    // FIX 8: Sporcu seçildiği anda sidebar'ı güncelle
     syncAthleteToSidebar();
     updateCalibrationBadge();
 }
@@ -2840,8 +2921,6 @@ function toggleProfileEdit() {
     const isActive = form.classList.toggle('active');
     if (btn) btn.textContent = isActive ? '✕ Kapat' : '✏️ Düzenle';
 }
-
-// ✅ v9.9 FIX 8: Ortak syncAthleteToSidebar() kullanılıyor (manuel atamalar kaldırıldı)
 function saveAthleteProfile() {
     if (!STATE.currentAthlete) return;
     const a = STATE.athletes[STATE.currentAthlete];
@@ -2855,9 +2934,8 @@ function saveAthleteProfile() {
     const notes = document.getElementById('pcNotes')?.value || '';
     a.profile = { height, weight, birthYear, position, dominantFoot, team, notes };
     saveAthletes();
-    syncAthleteToSidebar();  // FIX 8: tek satır, ortak fonksiyon
+    syncAthleteToSidebar();
     renderProfileCard(); renderAthletes(); updateCalibrationBadge();
-    STATE.log(`✏️ ${a.name} profili güncellendi`, 'success');
     showToast('✅ Profil kaydedildi', 'success', 2500);
 }
 function updateCalibrationBadge() {
@@ -2873,20 +2951,15 @@ function updateCalibrationBadge() {
         hint.textContent = 'Aktif sporcu seçilirse profili kullanılır.';
     }
 }
-
-// ✅ v9.9 FIX 7: Panel kapanınca oturumu sıfırla
 function closeAthleteDetail() {
     document.getElementById('athleteDetailPanel').classList.remove('open');
-    if (STATE.currentSessionId) {
-        STATE.currentSessionId = null;
-        STATE.sessionBuffer = [];
-    }
+    if (STATE.currentSessionId) { STATE.currentSessionId = null; STATE.sessionBuffer = []; }
 }
 function renderSessions() {
     const a = STATE.athletes[STATE.currentAthlete];
     if (!a) return;
     const list = document.getElementById('athleteSessions');
-    if (!a.sessions.length) { list.innerHTML = `<div class="empty-history"><span class="big-icon">📭</span>Bu sporcunun henüz testi yok.</div>`; return; }
+    if (!a.sessions.length) { list.innerHTML = `<div class="empty-history"><span class="big-icon">📭</span>Henüz test yok.</div>`; return; }
     const sorted = a.sessions.slice().reverse();
     list.innerHTML = sorted.map((s, idx) => {
         const prev = sorted[idx + 1];
@@ -2898,7 +2971,7 @@ function renderSessions() {
                     <span class="sc-badge">${s.tests.length} test</span>
                 </div>
                 <div class="sc-modes">
-                    ${s.tests.map(t => `<span class="sc-mode-chip">${escapeHtml(t.type)} · ${t.doneReps || 0}/${t.goalReps || 0}${t.refined ? ' 🏆' : ''}</span>`).join('')}
+                    ${s.tests.map(t => `<span class="sc-mode-chip">${escapeHtml(t.type)} · ${t.doneReps || 0}/${t.goalReps || 0}${t.refined ? ' 🏆' : ''}${t.type === 'AMRAP' ? ' 🎯' : ''}</span>`).join('')}
                 </div>
                 ${dev ? renderDevPanel(dev) : ''}
                 <div class="sc-actions">
@@ -2916,41 +2989,32 @@ function deleteSession(athleteId, sessionDate) {
     a.sessions = a.sessions.filter(s => s.date !== sessionDate);
     saveAthletes(); renderSessions();
 }
-
-// ✅ v9.9 FIX 8: Yeni test başlarken sidebar'ı sporcu profiliyle senkronize et
 function startNewSession() {
     if (!STATE.currentAthlete) { showToast('Önce sporcu seçin', 'warning'); return; }
     STATE.sessionBuffer = [];
     STATE.currentSessionId = Date.now();
-    syncAthleteToSidebar();  // FIX 8: sporcunun kg/boy değerlerini sidebar'a yansıt
+    syncAthleteToSidebar();
     const aName = STATE.athletes[STATE.currentAthlete]?.name || '';
     STATE.log(`🎬 Yeni oturum: ${aName}`, 'success');
     showToast(`🎬 Oturum hazır: ${escapeHtml(aName)}`, 'success', 3500);
     document.getElementById('athleteDetailPanel').classList.remove('open');
     updateCalibrationBadge();
 }
-
-// ✅ v9.9 FIX 7: Orphan (sahipsiz) session guard
 function addTestToSession(record) {
     if (!STATE.currentAthlete || !STATE.athletes[STATE.currentAthlete]) return false;
     const a = STATE.athletes[STATE.currentAthlete];
-
-    // FIX 7: currentSessionId başka sporcuda mı kalmış? Sızıntıyı yakala
     if (STATE.currentSessionId) {
         const ownSession = a.sessions.find(s => s.date === STATE.currentSessionId);
         if (!ownSession) {
             const orphaned = Object.values(STATE.athletes).some(other =>
-                other.id !== STATE.currentAthlete &&
-                other.sessions.some(s => s.date === STATE.currentSessionId)
+                other.id !== STATE.currentAthlete && other.sessions.some(s => s.date === STATE.currentSessionId)
             );
             if (orphaned) {
-                STATE.log(`⚠️ Session sızıntısı tespit edildi, yeni oturum açılıyor`, 'warning');
                 STATE.currentSessionId = null;
                 STATE.sessionBuffer = [];
             }
         }
     }
-
     if (!STATE.currentSessionId) STATE.currentSessionId = Date.now();
     STATE.sessionBuffer.push(record);
     let session = a.sessions.find(s => s.date === STATE.currentSessionId);
@@ -2979,6 +3043,8 @@ function compareSessions(oldS, newS) {
             if (oC && nC) diffs.chain = +(nC - oC).toFixed(1);
             const oV = oS.pushVelocity || 0, nV = nS.pushVelocity || 0;
             if (oV && nV) diffs.pushV = pctChange(oV, nV);
+            const oF = oS.fatigue?.index || 0, nF = nS.fatigue?.index || 0;
+            if (oF && nF) diffs.fatigue = +(nF - oF).toFixed(1);
         }
         result.tests[newT.type] = diffs;
         const key = diffs.power ?? diffs.jumpOrRom ?? diffs.reps;
@@ -2996,17 +3062,20 @@ function renderDevPanel(dev) {
             if (typeof val !== 'number') return;
             const cls = val > 3 ? 'dev-up' : val < -3 ? 'dev-down' : 'dev-flat';
             const arrow = val > 3 ? '▲' : val < -3 ? '▼' : '→';
-            const label = { power: 'Güç', jumpOrRom: type === 'JUMP' ? 'Sıçrama' : 'ROM', chain: 'Kinetik %', reps: 'Tekrar', pushV: 'İtme Hızı' }[key] || key;
-            const suffix = key === 'chain' ? ' puan' : '%';
-            rows.push(`<div class="dev-row"><span>${escapeHtml(type)} · ${label}</span><span class="${cls}">${arrow} ${val > 0 ? '+' : ''}${val}${suffix}</span></div>`);
+            const label = { power: 'Güç', jumpOrRom: type === 'JUMP' ? 'Sıçrama' : 'ROM', chain: 'Kinetik', reps: 'Tekrar', pushV: 'İtme', fatigue: 'Yorgunluk' }[key] || key;
+            const suffix = key === 'chain' || key === 'fatigue' ? ' puan' : '%';
+            const invertColor = key === 'fatigue' ? (val < -3 ? 'dev-up' : val > 3 ? 'dev-down' : 'dev-flat') : cls;
+            const invertArrow = key === 'fatigue' ? (val < -3 ? '▼' : val > 3 ? '▲' : '→') : arrow;
+            rows.push(`<div class="dev-row"><span>${escapeHtml(type)} · ${label}</span><span class="${invertColor}">${invertArrow} ${val > 0 ? '+' : ''}${val}${suffix}</span></div>`);
         });
     });
     if (!rows.length) return '';
     const badge = dev.overall === 'up' ? '📈 Gelişim' : dev.overall === 'down' ? '📉 Düşüş' : '➖ Stabil';
     const color = dev.overall === 'up' ? 'var(--accent-emerald)' : dev.overall === 'down' ? 'var(--accent-rose)' : 'var(--text-dim)';
-    return `<div class="dev-panel"><div style="color:${color};font-weight:700;margin-bottom:6px;">${badge}</div>${rows.slice(0, 8).join('')}</div>`;
+    return `<div class="dev-panel"><div style="color:${color};font-weight:700;margin-bottom:6px;">${badge}</div>${rows.slice(0, 10).join('')}</div>`;
 }
 
+// PDF (Stabil'in detaylı PDF'i + AMRAP sayfası)
 const TURKISH_FONT = { name: 'Azythos', loaded: false, loading: null, regular: null, bold: null, failed: false };
 const TURKISH_FONT_SOURCES = {
     regular: ['https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf'],
@@ -3106,7 +3175,7 @@ async function generateAthletePDF() {
         for (let i = 1; i <= pc; i++) {
             doc.setPage(i);
             doc.setFontSize(8); doc.setTextColor(150);
-            doc.text(`Azythos Motion v9.9 · ${a.name}`, margin, pageH - 8);
+            doc.text(`Azythos Motion v9.9 Ultimate · ${a.name}`, margin, pageH - 8);
             doc.text(`Sayfa ${i} / ${pc}`, pageW - margin, pageH - 8, { align: 'right' });
         }
         const safeName = a.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
@@ -3119,69 +3188,6 @@ async function generateAthletePDF() {
         if (btn) { btn.disabled = false; btn.textContent = orig || '📄 PDF Rapor'; }
     }
 }
-async function generateTeamPDF() {
-    const athletes = Object.values(STATE.athletes).sort((a, b) => b.created - a.created);
-    if (!athletes.length) { showToast('Önce sporcu ekleyin', 'warning'); return; }
-    const withData = athletes.filter(a => a.sessions.length > 0);
-    if (!withData.length) { showToast('Hiçbir sporcunun testi yok', 'warning'); return; }
-    if (!isPDFLibraryReady()) { showToast('❌ PDF motoru yüklenemedi', 'error', 6000); return; }
-    showToast(`📄 Takım PDF hazırlanıyor (${withData.length} sporcu)...`, 'info', 4000);
-    try {
-        await ensureTurkishFont();
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-        applyTurkishFontToDoc(doc);
-        const pageW = 210, margin = 18;
-        doc.setFillColor(10, 14, 26); doc.rect(0, 0, pageW, 297, 'F');
-        doc.setFillColor(16, 185, 129); doc.rect(0, 0, pageW, 4, 'F');
-        doc.setFontSize(32); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold');
-        doc.text('AZYTHOS', 20, 60); doc.setTextColor(16, 185, 129); doc.text('MOTION', 20, 72);
-        doc.setFontSize(14); doc.setTextColor(148, 163, 184); doc.setFont('helvetica', 'normal');
-        doc.text('Team Performance Report', 20, 85);
-        doc.setFontSize(11); doc.setTextColor(100, 116, 139);
-        doc.text(`${withData.length} sporcu · ${new Date().toLocaleDateString('tr-TR')}`, 20, 100);
-        doc.setFontSize(10); doc.setTextColor(148, 163, 184);
-        doc.text(`Toplam oturum: ${withData.reduce((s, a) => s + a.sessions.length, 0)}`, 20, 110);
-        doc.text(`Toplam test: ${withData.reduce((s, a) => s + a.sessions.reduce((x, ss) => x + ss.tests.length, 0), 0)}`, 20, 118);
-        doc.text(`Rapor: ${new Date().toLocaleString('tr-TR')}`, 20, 297 - 15);
-        doc.addPage();
-        doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
-        doc.text('Takım Özeti', margin, 25);
-        doc.setDrawColor(16, 185, 129); doc.setLineWidth(1); doc.line(margin, 29, margin + 30, 29);
-        const rows = withData.map(a => {
-            const p = a.profile || {};
-            const allTests = a.sessions.flatMap(s => s.tests);
-            const jumpTests = allTests.filter(t => t.type === 'JUMP' || t.type === 'DROPJUMP');
-            const bestJump = jumpTests.reduce((best, t) => {
-                const cm = t.refined?.jumpHeightCm || t.summary?.bestJumpCm || 0;
-                return Math.max(best, cm);
-            }, 0);
-            const bestPower = allTests.reduce((best, t) => {
-                const w = t.refined?.sayersPowerW || t.summary?.bestPeakPower || t.summary?.peakPowerW || 0;
-                return Math.max(best, w);
-            }, 0);
-            return [a.name, p.height || '?', p.weight || '?', p.position || '—', a.sessions.length, allTests.length, bestJump ? `${bestJump}cm` : '—', bestPower ? `${bestPower}W` : '—'];
-        });
-        try {
-            doc.autoTable({
-                startY: 40,
-                head: [['Sporcu', 'Boy', 'Kilo', 'Mevki', 'Oturum', 'Test', 'En İyi Sıçr.', 'En İyi Güç']],
-                body: rows,
-                theme: 'grid',
-                headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-                bodyStyles: { fontSize: 9, textColor: 50 },
-                alternateRowStyles: { fillColor: [245, 250, 247] },
-                margin: { left: margin, right: margin },
-            });
-        } catch (e) { rows.forEach((r, i) => doc.text(r.join('  |  '), margin, 45 + i * 5)); }
-        for (const a of withData) { doc.addPage(); drawExecutiveSummary(doc, a, pageW, margin); }
-        doc.save(`Azythos_Team_${new Date().toISOString().slice(0, 10)}.pdf`);
-        showToast(`✅ Takım PDF indirildi (${withData.length} sporcu)`, 'success', 5000);
-    } catch (err) {
-        console.error('[Team PDF]', err);
-        showToast('❌ Takım PDF oluşturulamadı', 'error', 6000);
-    }
-}
 function drawCoverPage(doc, a, w, h) {
     doc.setFillColor(10, 14, 26); doc.rect(0, 0, w, h, 'F');
     doc.setFillColor(16, 185, 129); doc.rect(0, 0, w, 4, 'F');
@@ -3191,7 +3197,7 @@ function drawCoverPage(doc, a, w, h) {
     doc.setTextColor(255, 255, 255); doc.setFontSize(32); doc.text('AZYTHOS', 46, 44);
     doc.setTextColor(16, 185, 129); doc.text('MOTION', 46, 54);
     doc.setFontSize(11); doc.setTextColor(148, 163, 184); doc.setFont('helvetica', 'normal');
-    doc.text('Biomechanical Performance Report v9.9', 46, 62);
+    doc.text('Biomechanical Performance Report v9.9 Ultimate', 46, 62);
     doc.setFillColor(17, 24, 39); doc.roundedRect(20, 90, w - 40, 80, 4, 4, 'F');
     doc.setDrawColor(16, 185, 129); doc.setLineWidth(0.5); doc.roundedRect(20, 90, w - 40, 80, 4, 4, 'S');
     doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.text('ATHLETE', 30, 105);
@@ -3202,10 +3208,9 @@ function drawCoverPage(doc, a, w, h) {
     let pl = '';
     if (p.height) pl += `Boy: ${p.height}cm  `;
     if (p.weight) pl += `Kilo: ${p.weight}kg  `;
-    if (p.birthYear) pl += `Yaş: ${new Date().getFullYear() - p.birthYear}  `;
+    if (p.birthYear) pl += `Yas: ${new Date().getFullYear() - p.birthYear}  `;
     if (p.position) pl += `Mevki: ${p.position}  `;
-    if (p.dominantFoot) pl += `Ayak: ${p.dominantFoot}`;
-    doc.text(pl || 'Profil bilgisi girilmemiş', 30, 128);
+    doc.text(pl || 'Profil bilgisi girilmemis', 30, 128);
     doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.text('SESSIONS', 30, 142);
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text(`${a.sessions.length}`, 30, 152);
     doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.text('FIRST', 90, 142);
@@ -3215,7 +3220,7 @@ function drawCoverPage(doc, a, w, h) {
     doc.setTextColor(255, 255, 255); doc.setFontSize(11);
     doc.text(new Date(Math.max(...a.sessions.map(s => s.date))).toLocaleDateString('tr-TR'), 140, 152);
     doc.setFontSize(10); doc.setTextColor(100, 116, 139);
-    doc.text('AI pose + Explosiveness Triad + Stable Queue', w / 2, h - 40, { align: 'center' });
+    doc.text('AI pose + Explosiveness Triad + AMRAP + Stable Queue', w / 2, h - 40, { align: 'center' });
     doc.setFontSize(8); doc.text('Data processed locally', w / 2, h - 34, { align: 'center' });
     doc.text(`Report: ${new Date().toLocaleString('tr-TR')}`, w / 2, h - 24, { align: 'center' });
 }
@@ -3235,14 +3240,14 @@ function drawExecutiveSummary(doc, a, w, margin) {
     const td = buildSummaryTable(a);
     try {
         doc.autoTable({
-            startY: y, head: [['Metrik', 'İlk', 'Son', 'Değişim']], body: td, theme: 'grid',
+            startY: y, head: [['Metrik', 'Ilk', 'Son', 'Degisim']], body: td, theme: 'grid',
             headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
             bodyStyles: { fontSize: 9, textColor: 50 },
             alternateRowStyles: { fillColor: [245, 250, 247] },
             margin: { left: margin, right: margin },
         });
         y = doc.lastAutoTable.finalY + 15;
-    } catch (e) { td.forEach(row => { doc.text(row.join('  ·  '), margin, y); y += 5; }); y += 10; }
+    } catch (e) { td.forEach(row => { doc.text(row.join('  |  '), margin, y); y += 5; }); y += 10; }
     const trend = determineOverallTrend(a);
     doc.setFillColor(trend.color[0], trend.color[1], trend.color[2]);
     doc.roundedRect(margin, y, w - 2 * margin, 18, 3, 3, 'F');
@@ -3250,7 +3255,7 @@ function drawExecutiveSummary(doc, a, w, margin) {
     doc.text(trend.label, margin + 6, y + 11);
 }
 function buildExecutiveSummary(a) {
-    if (a.sessions.length < 2) return `${a.name} için tek oturum. İlerleme için 2+ oturum önerilir.`;
+    if (a.sessions.length < 2) return `${a.name} icin tek oturum. Ilerleme icin 2+ oturum onerilir.`;
     const f = a.sessions[0], l = a.sessions[a.sessions.length - 1];
     const days = Math.round((l.date - f.date) / 86400000);
     const types = new Set(); a.sessions.forEach(s => s.tests.forEach(t => types.add(t.type)));
@@ -3258,13 +3263,13 @@ function buildExecutiveSummary(a) {
     types.forEach(type => {
         const fs = f.tests.find(t => t.type === type), ls = l.tests.find(t => t.type === type);
         if (!fs || !ls) return;
-        const fp = fs.refined?.sayersPowerW || fs.summary?.avgPowerW || 0;
-        const lp = ls.refined?.sayersPowerW || ls.summary?.avgPowerW || 0;
+        const fp = fs.refined?.sayersPowerW || fs.summary?.avgPowerW || fs.summary?.totalReps || 0;
+        const lp = ls.refined?.sayersPowerW || ls.summary?.avgPowerW || ls.summary?.totalReps || 0;
         if (fp && lp) { if (lp > fp * 1.03) imp++; else if (lp < fp * 0.97) dec++; }
     });
-    return `${a.name}'in ${days} günlük gelişimi. ${a.sessions.length} oturum, ${types.size} hareket tipi. ` +
-        (imp > dec ? `${imp} grup gelişim, ${dec} grup düşüş. Pozitif trend.`
-        : imp < dec ? `${imp} gelişti, ${dec} düştü. Revizyon önerilir.`
+    return `${a.name} icin ${days} gunluk gelisim. ${a.sessions.length} oturum, ${types.size} hareket tipi. ` +
+        (imp > dec ? `${imp} grup gelisim, ${dec} grup dusus. Pozitif trend.`
+        : imp < dec ? `${imp} gelisti, ${dec} dustu. Revizyon onerilir.`
         : `Performans stabil.`);
 }
 function buildSummaryTable(a) {
@@ -3277,15 +3282,19 @@ function buildSummaryTable(a) {
         if (!fs || !ls) return;
         const fp = fs.refined?.sayersPowerW || fs.summary?.avgPowerW || 0;
         const lp = ls.refined?.sayersPowerW || ls.summary?.avgPowerW || 0;
-        if (fp && lp) rows.push([`${type} · Güç`, fp.toString(), lp.toString(), `${pctChange(fp, lp) > 0 ? '+' : ''}${pctChange(fp, lp)}%`]);
+        if (fp && lp) rows.push([`${type} · Guc`, fp.toString(), lp.toString(), `${pctChange(fp, lp) > 0 ? '+' : ''}${pctChange(fp, lp)}%`]);
         const fj = fs.refined?.jumpHeightCm || 0, lj = ls.refined?.jumpHeightCm || 0;
-        if (fj && lj) rows.push([`${type} · Sıçrama`, fj.toString(), lj.toString(), `${pctChange(fj, lj) > 0 ? '+' : ''}${pctChange(fj, lj)}%`]);
-        const fr = fs.refined?.rfdNsPerKg || 0, lr = ls.refined?.rfdNsPerKg || 0;
-        if (fr && lr) rows.push([`${type} · RFD`, fr.toString(), lr.toString(), `${pctChange(fr, lr) > 0 ? '+' : ''}${pctChange(fr, lr)}%`]);
+        if (fj && lj) rows.push([`${type} · Sicrama`, fj.toString(), lj.toString(), `${pctChange(fj, lj) > 0 ? '+' : ''}${pctChange(fj, lj)}%`]);
         const frs = fs.refined?.rsi || 0, lrs = ls.refined?.rsi || 0;
         if (frs && lrs) rows.push([`${type} · RSI`, frs.toString(), lrs.toString(), `${pctChange(frs, lrs) > 0 ? '+' : ''}${pctChange(frs, lrs)}%`]);
+        const fr = fs.summary?.totalReps || fs.liveEstimate?.totalReps || 0;
+        const lr = ls.summary?.totalReps || ls.liveEstimate?.totalReps || 0;
+        if (fr && lr) rows.push([`${type} · Tekrar`, fr.toString(), lr.toString(), `${pctChange(fr, lr) > 0 ? '+' : ''}${pctChange(fr, lr)}%`]);
+        const ff = fs.summary?.fatigue?.index || fs.liveEstimate?.fatigue?.index || 0;
+        const lf = ls.summary?.fatigue?.index || ls.liveEstimate?.fatigue?.index || 0;
+        if (ff && lf) rows.push([`${type} · Yorgunluk`, `%${ff}`, `%${lf}`, `${pctChange(ff, lf) > 0 ? '+' : ''}${pctChange(ff, lf)}%`]);
     });
-    return rows.length ? rows : [['Karşılaştırma yok', '—', '—', '—']];
+    return rows.length ? rows : [['Karsilastirma yok', '—', '—', '—']];
 }
 function determineOverallTrend(a) {
     if (a.sessions.length < 2) return { label: 'Veri bekleniyor', color: [100, 116, 139] };
@@ -3299,22 +3308,94 @@ function determineOverallTrend(a) {
         if (fp && lp) { g += pctChange(fp, lp); t++; }
     });
     const avg = t ? g / t : 0;
-    if (avg > 8) return { label: `Olağanüstü Gelişim (+${avg.toFixed(1)}%)`, color: [16, 185, 129] };
-    if (avg > 3) return { label: `Belirgin Gelişim (+${avg.toFixed(1)}%)`, color: [34, 211, 238] };
+    if (avg > 8) return { label: `Olaganustu Gelisim (+${avg.toFixed(1)}%)`, color: [16, 185, 129] };
+    if (avg > 3) return { label: `Belirgin Gelisim (+${avg.toFixed(1)}%)`, color: [34, 211, 238] };
     if (avg > -3) return { label: `Stabil (${avg.toFixed(1)}%)`, color: [148, 163, 184] };
-    if (avg > -8) return { label: `Hafif Düşüş (${avg.toFixed(1)}%)`, color: [251, 191, 36] };
-    return { label: `Belirgin Düşüş (${avg.toFixed(1)}%) — Revizyon`, color: [244, 63, 94] };
+    if (avg > -8) return { label: `Hafif Dusus (${avg.toFixed(1)}%)`, color: [251, 191, 36] };
+    return { label: `Belirgin Dusus (${avg.toFixed(1)}%) - Revizyon`, color: [244, 63, 94] };
 }
 function drawExercisePage(doc, a, type, w, h, margin) {
     let y = 25;
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
     doc.text(`${type} Analysis`, margin, y);
-    y += 4; doc.setDrawColor(59, 130, 246); doc.setLineWidth(1); doc.line(margin, y, margin + 30, y);
+    y += 4; 
+    const accent = type === 'AMRAP' ? [139, 92, 246] : type === 'JUMP' || type === 'DROPJUMP' ? [251, 191, 36] : [59, 130, 246];
+    doc.setDrawColor(accent[0], accent[1], accent[2]); doc.setLineWidth(1); doc.line(margin, y, margin + 30, y);
     y += 12;
     const tests = a.sessions.map(s => ({ date: s.date, test: s.tests.find(t => t.type === type) })).filter(x => x.test);
     if (!tests.length) { doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text('Veri yok.', margin, y); return; }
-    doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
-    doc.text('Session History', margin, y); y += 6;
+
+    if (type === 'AMRAP') {
+        const rows = tests.map(({ date, test }) => {
+            const s = test.liveEstimate || test.summary || {};
+            return [
+                new Date(date).toLocaleDateString('tr-TR'),
+                s.amrapExercise || '—',
+                `${s.totalReps || 0}`,
+                `${s.totalSec || 0}s`,
+                `${s.tempo || 0}/dk`,
+                s.fatigue ? `%${s.fatigue.index}` : '—',
+            ];
+        });
+        try {
+            doc.autoTable({
+                startY: y, head: [['Tarih', 'Hareket', 'Tekrar', 'Sure', 'Tempo', 'Yorgunluk']],
+                body: rows, theme: 'striped',
+                headStyles: { fillColor: [139, 92, 246], textColor: 255, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 9, textColor: 40 },
+                margin: { left: margin, right: margin },
+            });
+            y = doc.lastAutoTable.finalY + 15;
+        } catch (e) { rows.forEach(r => { doc.text(r.join('  |  '), margin, y); y += 5; }); y += 10; }
+
+        const last = tests[tests.length - 1].test;
+        const s = last.liveEstimate || last.summary || {};
+        if (s.totalReps && y < h - 100) {
+            doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+            doc.text('Son Oturum', margin, y); y += 8;
+            const boxW = (w - 2 * margin - 20) / 3;
+            const boxes = [
+                { label: 'Toplam Tekrar', value: `${s.totalReps}`, color: [139, 92, 246] },
+                { label: 'Sure', value: `${s.totalSec}s`, color: [34, 211, 238] },
+                { label: 'Tempo', value: `${s.tempo}/dk`, color: [16, 185, 129] },
+            ];
+            boxes.forEach((box, i) => {
+                const bx = margin + i * (boxW + 10);
+                doc.setFillColor(245, 247, 250);
+                doc.roundedRect(bx, y, boxW, 22, 2, 2, 'F');
+                doc.setFillColor(box.color[0], box.color[1], box.color[2]);
+                doc.roundedRect(bx, y, 2, 22, 1, 1, 'F');
+                doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal');
+                doc.text(box.label, bx + 5, y + 7);
+                doc.setFontSize(14); doc.setTextColor(10, 14, 26); doc.setFont('helvetica', 'bold');
+                doc.text(box.value, bx + 5, y + 17);
+            });
+            y += 30;
+            if (s.fatigue) {
+                doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+                doc.text('Yorgunluk Analizi', margin, y); y += 6;
+                const f = s.fatigue;
+                const col = f.color === 'emerald' ? [16, 185, 129] : f.color === 'cyan' ? [34, 211, 238]
+                    : f.color === 'blue' ? [59, 130, 246] : f.color === 'amber' ? [251, 191, 36] : [244, 63, 94];
+                doc.setFillColor(col[0], col[1], col[2]);
+                doc.roundedRect(margin, y, w - 2 * margin, 16, 2, 2, 'F');
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+                doc.text(`Yorgunluk Indexi: %${f.index} - ${f.label}`, margin + 5, y + 10);
+                y += 22;
+                if (y < h - 80) {
+                    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+                    doc.text('Yorgunluk Egrisi', margin, y); y += 6;
+                    try {
+                        const img = renderAMRAPFatigueChart(s.reps || []);
+                        if (img) { doc.addImage(img, 'PNG', margin, y, w - 2 * margin, 60); y += 68; }
+                    } catch (_) {}
+                }
+            }
+        }
+        return;
+    }
+
+    // Standart egzersizler
     const rows = tests.map(({ date, test }) => {
         if (test.refined) return [
             new Date(date).toLocaleDateString('tr-TR'), `${test.refined.jumpHeightCm}cm`,
@@ -3328,16 +3409,16 @@ function drawExercisePage(doc, a, type, w, h, margin) {
     });
     try {
         if (type === 'JUMP' || type === 'DROPJUMP') {
-            doc.autoTable({ startY: y, head: [['Tarih', 'Yük.', 'Kinetik', 'Güç', 'İtme', 'RFD', 'RSI']], body: rows, theme: 'striped', headStyles: { fillColor: [251, 191, 36], textColor: 10 }, bodyStyles: { fontSize: 8, textColor: 40 }, margin: { left: margin, right: margin } });
+            doc.autoTable({ startY: y, head: [['Tarih', 'Yuk.', 'Kinetik', 'Guc', 'Itme', 'RFD', 'RSI']], body: rows, theme: 'striped', headStyles: { fillColor: [251, 191, 36], textColor: 10 }, bodyStyles: { fontSize: 8, textColor: 40 }, margin: { left: margin, right: margin } });
         } else {
-            doc.autoTable({ startY: y, head: [['Tarih', 'Tekrar', 'Ort. Güç', 'Peak', 'ROM', 'Yük']], body: rows.map(r => [r[0], r[1], r[2], r[3], r[5], r[2]]), theme: 'striped', headStyles: { fillColor: [59, 130, 246], textColor: 255 }, bodyStyles: { fontSize: 9, textColor: 40 }, margin: { left: margin, right: margin } });
+            doc.autoTable({ startY: y, head: [['Tarih', 'Tekrar', 'Ort. Guc', 'Peak', 'ROM', 'Yuk']], body: rows.map(r => [r[0], r[1], r[2], r[3], r[5], r[2]]), theme: 'striped', headStyles: { fillColor: [59, 130, 246], textColor: 255 }, bodyStyles: { fontSize: 9, textColor: 40 }, margin: { left: margin, right: margin } });
         }
         y = doc.lastAutoTable.finalY + 12;
-    } catch (e) { rows.forEach(row => { doc.text(row.join('  ·  '), margin, y); y += 4.5; }); y += 8; }
+    } catch (e) { rows.forEach(row => { doc.text(row.join('  |  '), margin, y); y += 4.5; }); y += 8; }
     const lastR = tests.slice().reverse().find(t => t.test.refined?.hipMap);
     if (lastR && y < h - 90) {
         doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
-        doc.text('Kalça Konum Haritası', margin, y); y += 6;
+        doc.text('Kalca Konum Haritasi', margin, y); y += 6;
         try {
             const img = renderHipMapToDataURL(lastR.test.refined.hipMap, 800, 240);
             if (img) { doc.addImage(img, 'PNG', margin, y, w - 2 * margin, 55); y += 62; }
@@ -3379,7 +3460,7 @@ function renderHipMapToDataURL(hipMap, width, height) {
         cx.fillText(`Zirve: ${peak.cm.toFixed(1)}cm`, 10, 20);
     }
     cx.fillStyle = 'rgba(255,255,255,.5)'; cx.font = '11px monospace';
-    cx.fillText(`Süre: ${(maxT / 1000).toFixed(2)}s`, 10, height - 6);
+    cx.fillText(`Sure: ${(maxT / 1000).toFixed(2)}s`, 10, height - 6);
     return c.toDataURL('image/png');
 }
 async function drawProgressCharts(doc, a, w, h, margin) {
@@ -3401,21 +3482,30 @@ async function drawProgressCharts(doc, a, w, h, margin) {
             const labels = sessions.map(s => new Date(s.date).toLocaleDateString('tr-TR'));
             const powers = sessions.map(s => s.test.refined?.sayersPowerW || s.test.summary?.avgPowerW || 0);
             const jumps = sessions.map(s => s.test.refined?.jumpHeightCm || 0);
-            const rfd = sessions.map(s => s.test.refined?.rfdNsPerKg || 0);
             const rsi = sessions.map(s => s.test.refined?.rsi || s.test.summary?.avgRSI || 0);
-            const hasRFD = rfd.some(v => v > 0), hasRSI = rsi.some(v => v > 0);
-            const datasets = [
-                { label: 'Güç (W)', data: powers, borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,.15)', borderWidth: 3, fill: true, tension: 0.35, yAxisID: 'y' },
-                { label: 'Sıçrama (cm)', data: jumps, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.1)', borderWidth: 2, borderDash: [5,5], tension: 0.35, yAxisID: 'y1' },
-            ];
-            if (hasRFD) datasets.push({ label: 'RFD', data: rfd, borderColor: '#8b5cf6', borderWidth: 2, tension: 0.35, yAxisID: 'y2' });
-            if (hasRSI) datasets.push({ label: 'RSI', data: rsi, borderColor: '#f43f5e', borderWidth: 2, tension: 0.35, yAxisID: 'y3' });
+            const reps = sessions.map(s => s.test.summary?.totalReps || s.test.liveEstimate?.totalReps || 0);
+            const fatigue = sessions.map(s => s.test.summary?.fatigue?.index || s.test.liveEstimate?.fatigue?.index || 0);
+            const hasRSI = rsi.some(v => v > 0), hasReps = reps.some(v => v > 0), hasFatigue = fatigue.some(v => v > 0);
+
+            const isAMRAP = type === 'AMRAP';
+            const datasets = isAMRAP
+                ? [
+                    { label: 'Tekrar', data: reps, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.15)', borderWidth: 3, fill: true, tension: 0.35, yAxisID: 'y' },
+                    { label: 'Yorgunluk %', data: fatigue, borderColor: '#f43f5e', borderWidth: 2, tension: 0.35, yAxisID: 'y1' },
+                ]
+                : [
+                    { label: 'Guc (W)', data: powers, borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,.15)', borderWidth: 3, fill: true, tension: 0.35, yAxisID: 'y' },
+                    { label: 'Sicrama (cm)', data: jumps, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.1)', borderWidth: 2, borderDash: [5,5], tension: 0.35, yAxisID: 'y1' },
+                ];
+            if (!isAMRAP && hasRSI) datasets.push({ label: 'RSI', data: rsi, borderColor: '#f43f5e', borderWidth: 2, tension: 0.35, yAxisID: 'y2' });
+
             const scales = {
-                y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Watt' } },
-                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'cm' }, grid: { drawOnChartArea: false } },
+                y: { beginAtZero: true, position: 'left', title: { display: true, text: isAMRAP ? 'Tekrar' : 'Watt' } },
             };
-            if (hasRFD) scales.y2 = { beginAtZero: true, position: 'left', title: { display: true, text: 'RFD' }, grid: { drawOnChartArea: false } };
-            if (hasRSI) scales.y3 = { beginAtZero: true, position: 'right', title: { display: true, text: 'RSI' }, grid: { drawOnChartArea: false } };
+            if (!isAMRAP) scales.y1 = { beginAtZero: true, position: 'right', title: { display: true, text: 'cm' }, grid: { drawOnChartArea: false } };
+            if (isAMRAP) scales.y1 = { beginAtZero: true, position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } };
+            if (!isAMRAP && hasRSI) scales.y2 = { beginAtZero: true, position: 'right', title: { display: true, text: 'RSI' }, grid: { drawOnChartArea: false } };
+
             inst = new Chart(cv, { type: 'line', data: { labels, datasets }, options: { animation: false, responsive: false, devicePixelRatio: 1, plugins: { legend: { position: 'top', labels: { font: { size: 12 } } }, title: { display: true, text: type + ' · Progress', font: { size: 16 } } }, scales } });
             await new Promise(r => setTimeout(r, 800));
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -3423,7 +3513,7 @@ async function drawProgressCharts(doc, a, w, h, margin) {
             if (img && img.length > 100) { doc.addImage(img, 'PNG', margin, y, w - 2 * margin, 60); y += 72; }
         } catch (err) {
             doc.setFontSize(10); doc.setTextColor(244, 63, 94);
-            doc.text(`${type}: grafik oluşturulamadı`, margin, y + 30); y += 72;
+            doc.text(`${type}: grafik olusturulamadi`, margin, y + 30); y += 72;
         } finally {
             try { if (inst) inst.destroy(); } catch (_) {}
             try { if (cv.parentElement) cv.parentElement.removeChild(cv); } catch (_) {}
@@ -3450,14 +3540,14 @@ function drawCoachingPage(doc, a, w, margin) {
     });
     y += 10; doc.setDrawColor(230); doc.line(margin, y, w - margin, y); y += 10;
     doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(140);
-    const disc = 'Bu rapor MediaPipe ve Azythos Motion algoritması ile otomatik oluşturulmuştur. Tıbbi tanı değildir.';
+    const disc = 'Bu rapor MediaPipe ve Azythos Motion v9.9 Ultimate algoritmasi ile otomatik olusturulmustur. Tibbi tani degildir.';
     const lines = doc.splitTextToSize(disc, w - 2 * margin);
     doc.text(lines, margin, y);
 }
 function buildRecommendations(a) {
     const recs = [];
     if (a.sessions.length < 2) {
-        recs.push({ priority: 'mid', title: 'Veri Toplamaya Devam Edin', detail: 'İlerleme için 2+ oturum gerekir.' });
+        recs.push({ priority: 'mid', title: 'Veri Toplamaya Devam Edin', detail: 'Ilerleme icin 2+ oturum gerekir.' });
         return recs;
     }
     const f = a.sessions[0], l = a.sessions[a.sessions.length - 1];
@@ -3465,17 +3555,30 @@ function buildRecommendations(a) {
     types.forEach(type => {
         const fs = f.tests.find(t => t.type === type), ls = l.tests.find(t => t.type === type);
         if (!fs || !ls) return;
+
+        if (type === 'AMRAP') {
+            const lf = ls.summary?.fatigue || ls.liveEstimate?.fatigue;
+            if (lf) {
+                if (lf.index >= 80) recs.push({ priority: 'high', title: `AMRAP: Kritik Yorgunluk (%${lf.index})`, detail: 'Ciddi dayaniklilik eksikligi. HIIT ve tempo antrenmani onerilir.' });
+                else if (lf.index >= 60) recs.push({ priority: 'mid', title: `AMRAP: Zayif Dayaniklilik (%${lf.index})`, detail: 'Yorgunluk hizli birikiyor. Surekli kardiyo ekleyin.' });
+                else if (lf.index < 20) recs.push({ priority: 'low', title: `AMRAP: Elit Dayaniklilik (%${lf.index})`, detail: 'Yorgunluk direnci mukemmel.' });
+            }
+            const fr = fs.summary?.totalReps || fs.liveEstimate?.totalReps || 0;
+            const lr = ls.summary?.totalReps || ls.liveEstimate?.totalReps || 0;
+            if (fr && lr && lr > fr) recs.push({ priority: 'low', title: `AMRAP: +${lr - fr} tekrar`, detail: 'Dayaniklilik gelisiyor.' });
+            return;
+        }
+
         const fp = fs.refined?.sayersPowerW || fs.summary?.avgPowerW || 0;
         const lp = ls.refined?.sayersPowerW || ls.summary?.avgPowerW || 0;
         const pct = fp ? pctChange(fp, lp) : 0;
         if (ls.refined?.explosiveProfile?.color === 'rose') recs.push({ priority: 'high', title: `${type}: ${ls.refined.explosiveProfile.label}`, detail: ls.refined.explosiveProfile.text });
-        if (ls.refined?.rfdInterp?.level === 'weak') recs.push({ priority: 'high', title: `${type}: Zayıf RFD`, detail: ls.refined.rfdInterp.text });
-        if (ls.refined?.pushInterp?.level === 'weak') recs.push({ priority: 'high', title: `${type}: Zayıf İtme`, detail: ls.refined.pushInterp.text });
-        if (ls.refined?.rsiInterp?.level === 'weak') recs.push({ priority: 'high', title: `${type}: Zayıf RSI`, detail: ls.refined.rsiInterp.text });
-        if (pct > 15) recs.push({ priority: 'low', title: `${type}: Olağanüstü (+${pct}%)`, detail: 'Programı koruyun.' });
-        else if (pct < -10) recs.push({ priority: 'high', title: `${type}: Belirgin Düşüş (${pct}%)`, detail: 'Aşırı antrenman/beslenme kontrolü.' });
+        if (ls.refined?.rfdInterp?.level === 'weak') recs.push({ priority: 'high', title: `${type}: Zayif RFD`, detail: ls.refined.rfdInterp.text });
+        if (ls.refined?.pushInterp?.level === 'weak') recs.push({ priority: 'high', title: `${type}: Zayif Itme`, detail: ls.refined.pushInterp.text });
+        if (pct > 15) recs.push({ priority: 'low', title: `${type}: Olaganustu (+${pct}%)`, detail: 'Programi koruyun.' });
+        else if (pct < -10) recs.push({ priority: 'high', title: `${type}: Belirgin Dusus (${pct}%)`, detail: 'Asiri antrenman/beslenme kontrolu.' });
     });
-    recs.push({ priority: 'low', title: `Genel Trend: ${determineOverallTrend(a).label}`, detail: 'Haftalık aynı koşullarda test önerilir.' });
+    recs.push({ priority: 'low', title: `Genel Trend: ${determineOverallTrend(a).label}`, detail: 'Haftalik ayni kosullarda test onerilir.' });
     return recs;
 }
 async function generateSessionPDF(athleteId, sessionDate) {
@@ -3492,41 +3595,119 @@ async function generateSessionPDF(athleteId, sessionDate) {
         const w = 210, margin = 18;
         doc.setFillColor(10, 14, 26); doc.rect(0, 0, w, 30, 'F');
         doc.setFontSize(18); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold');
-        doc.text(`${a.name} — Session Report`, margin, 18);
+        doc.text(`${a.name} - Session Report`, margin, 18);
         doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
         doc.text(new Date(session.date).toLocaleString('tr-TR'), margin, 25);
         let y = 45;
         session.tests.forEach((t, i) => {
-            const h = 70 + (t.metrics?.length || 0) * 4;
-            doc.setFillColor(245, 250, 247); doc.roundedRect(margin, y, w - 2 * margin, h, 3, 3, 'F');
-            doc.setDrawColor(t.refined ? 251 : 16, t.refined ? 191 : 185, t.refined ? 36 : 129);
+            if (y > 240) { doc.addPage(); y = 25; }
+            const isAMRAP = t.type === 'AMRAP';
+            const h = isAMRAP ? 90 : 70 + (t.metrics?.length || 0) * 4;
+            doc.setFillColor(isAMRAP ? 245 : 245, isAMRAP ? 243 : 250, isAMRAP ? 255 : 247);
+            doc.roundedRect(margin, y, w - 2 * margin, h, 3, 3, 'F');
+            const ac = isAMRAP ? [139, 92, 246] : t.refined ? [251, 191, 36] : [16, 185, 129];
+            doc.setDrawColor(ac[0], ac[1], ac[2]);
             doc.roundedRect(margin, y, 3, h, 3, 3, 'F');
             doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
-            doc.text(`${i + 1}. ${t.type}${t.refined ? ' 🏆' : ''}`, margin + 8, y + 8);
+            doc.text(`${i + 1}. ${t.type}${t.refined ? ' [Gold]' : ''}${isAMRAP ? ' [AMRAP]' : ''}`, margin + 8, y + 8);
             doc.setFontSize(9); doc.setTextColor(100, 116, 139);
             doc.text(`${t.doneReps}/${t.goalReps} tekrar`, margin + 8, y + 14);
             doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
-            doc.text((t.metrics || []).join('\n'), margin + 8, y + 22);
-            if (t.refined?.hipMap) {
+            const metricsText = (t.metrics || []).map(m => trAscii(m)).join('\n');
+            doc.text(metricsText, margin + 8, y + 22);
+            if (isAMRAP) {
+                const s = t.summary || t.liveEstimate;
+                if (s?.fatigue) {
+                    const f = s.fatigue;
+                    const col = f.color === 'emerald' ? [16, 185, 129] : f.color === 'cyan' ? [34, 211, 238]
+                        : f.color === 'blue' ? [59, 130, 246] : f.color === 'amber' ? [251, 191, 36] : [244, 63, 94];
+                    doc.setFillColor(col[0], col[1], col[2]);
+                    doc.roundedRect(margin + 8, y + h - 30, w - 2 * margin - 16, 12, 2, 2, 'F');
+                    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+                    doc.text(`Yorgunluk Indexi: %${f.index} - ${trAscii(f.label)}`, margin + 12, y + h - 22);
+                }
+                if (s?.reps) {
+                    try {
+                        const img = renderAMRAPFatigueChart(s.reps);
+                        if (img) doc.addImage(img, 'PNG', margin + 8, y + h - 52, w - 2 * margin - 16, 28);
+                    } catch (_) {}
+                }
+            } else if (t.refined?.hipMap) {
                 try {
                     const img = renderHipMapToDataURL(t.refined.hipMap, 700, 180);
                     if (img) doc.addImage(img, 'PNG', margin + 8, y + h - 45, w - 2 * margin - 16, 35);
                 } catch (_) {}
             }
             y += h + 8;
-            if (y > 260) { doc.addPage(); y = 25; }
         });
         const safeName = a.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
         doc.save(`Azythos_${safeName}_session_${new Date(session.date).toISOString().slice(0, 10)}.pdf`);
         showToast(`✅ Oturum PDF indirildi`, 'success', 4000);
     } catch (err) { console.error('[Session PDF]', err); showToast('❌ Oturum PDF oluşturulamadı', 'error', 5000); }
 }
+async function generateTeamPDF() {
+    const athletes = Object.values(STATE.athletes).sort((a, b) => b.created - a.created);
+    if (!athletes.length) { showToast('Önce sporcu ekleyin', 'warning'); return; }
+    const withData = athletes.filter(a => a.sessions.length > 0);
+    if (!withData.length) { showToast('Hiçbir sporcunun testi yok', 'warning'); return; }
+    if (!isPDFLibraryReady()) { showToast('❌ PDF motoru yüklenemedi', 'error', 6000); return; }
+    showToast(`📄 Takım PDF hazırlanıyor (${withData.length} sporcu)...`, 'info', 4000);
+    try {
+        await ensureTurkishFont();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        applyTurkishFontToDoc(doc);
+        const pageW = 210, margin = 18;
+        doc.setFillColor(10, 14, 26); doc.rect(0, 0, pageW, 297, 'F');
+        doc.setFillColor(16, 185, 129); doc.rect(0, 0, pageW, 4, 'F');
+        doc.setFontSize(32); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold');
+        doc.text('AZYTHOS', 20, 60); doc.setTextColor(16, 185, 129); doc.text('MOTION', 20, 72);
+        doc.setFontSize(14); doc.setTextColor(148, 163, 184); doc.setFont('helvetica', 'normal');
+        doc.text('Team Performance Report', 20, 85);
+        doc.setFontSize(11); doc.setTextColor(100, 116, 139);
+        doc.text(`${withData.length} sporcu · ${new Date().toLocaleDateString('tr-TR')}`, 20, 100);
+        doc.setFontSize(10); doc.setTextColor(148, 163, 184);
+        doc.text(`Toplam oturum: ${withData.reduce((s, a) => s + a.sessions.length, 0)}`, 20, 110);
+        doc.text(`Toplam test: ${withData.reduce((s, a) => s + a.sessions.reduce((x, ss) => x + ss.tests.length, 0), 0)}`, 20, 118);
+        doc.text(`Rapor: ${new Date().toLocaleString('tr-TR')}`, 20, 297 - 15);
+        doc.addPage();
+        doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+        doc.text('Takim Ozeti', margin, 25);
+        doc.setDrawColor(16, 185, 129); doc.setLineWidth(1); doc.line(margin, 29, margin + 30, 29);
+        const rows = withData.map(a => {
+            const p = a.profile || {};
+            const allTests = a.sessions.flatMap(s => s.tests);
+            const jumpTests = allTests.filter(t => t.type === 'JUMP' || t.type === 'DROPJUMP');
+            const bestJump = jumpTests.reduce((best, t) => Math.max(best, t.refined?.jumpHeightCm || 0), 0);
+            const bestPower = allTests.reduce((best, t) => Math.max(best, t.refined?.sayersPowerW || t.summary?.bestPeakPower || t.summary?.peakPowerW || 0), 0);
+            const amrapTests = allTests.filter(t => t.type === 'AMRAP');
+            const bestAMRAP = amrapTests.reduce((best, t) => Math.max(best, t.summary?.totalReps || t.liveEstimate?.totalReps || 0), 0);
+            return [a.name, p.height || '?', p.weight || '?', p.position || '-', a.sessions.length, allTests.length, bestJump ? `${bestJump}cm` : '-', bestPower ? `${bestPower}W` : '-', bestAMRAP || '-'];
+        });
+        try {
+            doc.autoTable({
+                startY: 40,
+                head: [['Sporcu', 'Boy', 'Kilo', 'Mevki', 'Oturum', 'Test', 'Sicr.', 'Guc', 'AMRAP']],
+                body: rows, theme: 'grid',
+                headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+                bodyStyles: { fontSize: 8, textColor: 50 },
+                alternateRowStyles: { fillColor: [245, 250, 247] },
+                margin: { left: margin, right: margin },
+            });
+        } catch (e) { rows.forEach((r, i) => doc.text(r.join('  |  '), margin, 45 + i * 5)); }
+        for (const a of withData) { doc.addPage(); drawExecutiveSummary(doc, a, pageW, margin); }
+        doc.save(`Azythos_Team_${new Date().toISOString().slice(0, 10)}.pdf`);
+        showToast(`✅ Takım PDF indirildi (${withData.length} sporcu)`, 'success', 5000);
+    } catch (err) {
+        console.error('[Team PDF]', err);
+        showToast('❌ Takım PDF oluşturulamadı', 'error', 6000);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
         loadAthletes();
-        // ✅ v9.9 FIX 8: Başlangıçta aktif sporcu varsa sidebar'ı senkronize et
         if (STATE.currentAthlete) syncAthleteToSidebar();
         const suggested = detectDevice();
         document.querySelectorAll('.device-card').forEach(c => { if (c.dataset.device === suggested) c.classList.add('suggested'); });
@@ -3541,30 +3722,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ac !== null) { STATE.autoCleanupEnabled = ac === '1'; document.getElementById('autoCleanupToggle').checked = STATE.autoCleanupEnabled; }
         } catch (_) {}
 
-        STATE.log('🚀 Azythos Motion v9.9 STABIL + session fix + sidebar sync hazır', 'success');
+        STATE.log('🚀 Azythos Motion v9.9 ULTIMATE hazır', 'success');
         document.getElementById('telMode').textContent = '—';
         document.getElementById('telProgress').textContent = 'Beklemede';
         updateGlobalDisplay(); updateCalibrationBadge();
 
         if (STATE.autoCleanupEnabled) {
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => cleanupOldVideos(false), { timeout: 10000 });
-            } else {
-                setTimeout(() => cleanupOldVideos(false), 5000);
-            }
+            if ('requestIdleCallback' in window) requestIdleCallback(() => cleanupOldVideos(false), { timeout: 10000 });
+            else setTimeout(() => cleanupOldVideos(false), 5000);
         }
 
         const range = document.getElementById('freeDuration');
         const label = document.getElementById('freeDurationLabel');
-        range.addEventListener('input', () => { label.textContent = range.value + 's'; });
+        if (range && label) range.addEventListener('input', () => { label.textContent = range.value + 's'; });
 
-        document.getElementById('modelComplexity').addEventListener('change', async () => {
-            try {
-                STATE.log('🔄 Model değişti', 'info');
-                if (STATE.camera) await STATE.camera.stop();
-                await setupPose();
-                showToast('✅ Model güncellendi', 'success');
-            } catch (e) { showToast('Model değiştirilemedi', 'error'); }
+        const mc = document.getElementById('modelComplexity');
+        if (mc) mc.addEventListener('change', async () => {
+            try { if (STATE.camera) await STATE.camera.stop(); await setupPose(); showToast('✅ Model güncellendi', 'success'); }
+            catch (e) { showToast('Model hatası', 'error'); }
         });
 
         document.addEventListener('keydown', (e) => {
@@ -3588,17 +3763,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 · STABIL + SESSION FIX + SIDEBAR SYNC');
-        console.log('✅ hipMap bellek fix · canlı test koruması · RFD tek yerde · Queue limit 5');
-        console.log('✅ Sporcu değişim sızıntısı kapatıldı (session reset + orphan guard)');
-        console.log('✅ syncAthleteToSidebar() — sporcu profili artık sidebar inputlarına yansıyor');
+        console.log('◈ Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
     }
 });
 
+// Global exports
 window.startMode = startMode;
+window.startAMRAP = startAMRAP;
+window.stopAMRAP = stopAMRAP;
+window.updateAMRAPLimit = updateAMRAPLimit;
 window.startFreeManualRecord = startFreeManualRecord;
 window.toggleHistory = toggleHistory;
 window.toggleFullscreen = toggleFullscreen;
