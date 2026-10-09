@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP</title>
+    <title>Azythos Motion v9.9 · Stabil + AMRAP</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -100,7 +100,6 @@
         .chart-wrap canvas{width:100%!important;height:100%!important}
         .countdown-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:72px;font-weight:900;color:var(--accent-emerald);text-shadow:0 0 60px rgba(16,185,129,.5);z-index:20;pointer-events:none;opacity:0;transition:opacity .2s;font-family:var(--font-mono)}
         .countdown-overlay.show{opacity:1}
-        /* AMRAP */
         .amrap-card{border-color:#8b5cf6!important}
         .amrap-overlay{position:absolute;inset:0;background:rgba(2,6,23,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
         .amrap-overlay.visible{display:flex;animation:fade-in .3s ease}
@@ -336,7 +335,7 @@
             <div style="margin-top:8px;font-size:11px;color:var(--text-dim);" id="calibHint">Aktif sporcu seçilirse sporcunun profili kullanılır.</div>
         </div>
         <div class="card" style="border-color:var(--accent-cyan);">
-            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9 ULT</span></div>
+            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9</span></div>
             <div class="control-row" style="justify-content:flex-start;gap:16px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalUpper" checked onchange="updateGlobalDisplay()"> Üst</label>
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalLower" checked onchange="updateGlobalDisplay()"> Alt</label>
@@ -616,7 +615,7 @@
 
 <script>
 // =============================================================
-// v9.9 ULTIMATE · STABIL + AMRAP
+// v9.9 · STABIL + AMRAP + HIPMAP GALLERY
 // =============================================================
 
 window.addEventListener('error', function (e) {
@@ -1166,7 +1165,7 @@ async function setupPose() {
     document.getElementById('hudStatus').textContent = 'Hazır';
     updateCamLabel();
     await checkActualCameraFps();
-    speak('Azythos Motion v9.9 Ultimate hazır.');
+    speak('Azythos Motion v9.9 hazır.');
 }
 async function restartCamera() {
     if (STATE.camera) { try { await STATE.camera.stop(); } catch (_) {} STATE.camera = null; }
@@ -3075,7 +3074,6 @@ function renderDevPanel(dev) {
     return `<div class="dev-panel"><div style="color:${color};font-weight:700;margin-bottom:6px;">${badge}</div>${rows.slice(0, 10).join('')}</div>`;
 }
 
-// PDF (Stabil'in detaylı PDF'i + AMRAP sayfası)
 const TURKISH_FONT = { name: 'Azythos', loaded: false, loading: null, regular: null, bold: null, failed: false };
 const TURKISH_FONT_SOURCES = {
     regular: ['https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf'],
@@ -3169,13 +3167,20 @@ async function generateAthletePDF() {
         const typesInAll = new Set();
         a.sessions.forEach(s => s.tests.forEach(t => typesInAll.add(t.type)));
         typesInAll.forEach(type => { doc.addPage(); drawExercisePage(doc, a, type, pageW, pageH, margin); });
+
+        // HipMap Gallery Sayfası (JUMP veya DROPJUMP varsa)
+        if (typesInAll.has('JUMP') || typesInAll.has('DROPJUMP')) {
+            doc.addPage();
+            drawHipMapGalleryPage(doc, a, pageW, pageH, margin);
+        }
+
         doc.addPage(); await drawProgressCharts(doc, a, pageW, pageH, margin);
         doc.addPage(); drawCoachingPage(doc, a, pageW, margin);
         const pc = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pc; i++) {
             doc.setPage(i);
             doc.setFontSize(8); doc.setTextColor(150);
-            doc.text(`Azythos Motion v9.9 Ultimate · ${a.name}`, margin, pageH - 8);
+            doc.text(`Azythos Motion v9.9 · ${a.name}`, margin, pageH - 8);
             doc.text(`Sayfa ${i} / ${pc}`, pageW - margin, pageH - 8, { align: 'right' });
         }
         const safeName = a.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
@@ -3197,7 +3202,7 @@ function drawCoverPage(doc, a, w, h) {
     doc.setTextColor(255, 255, 255); doc.setFontSize(32); doc.text('AZYTHOS', 46, 44);
     doc.setTextColor(16, 185, 129); doc.text('MOTION', 46, 54);
     doc.setFontSize(11); doc.setTextColor(148, 163, 184); doc.setFont('helvetica', 'normal');
-    doc.text('Biomechanical Performance Report v9.9 Ultimate', 46, 62);
+    doc.text('Biomechanical Performance Report v9.9', 46, 62);
     doc.setFillColor(17, 24, 39); doc.roundedRect(20, 90, w - 40, 80, 4, 4, 'F');
     doc.setDrawColor(16, 185, 129); doc.setLineWidth(0.5); doc.roundedRect(20, 90, w - 40, 80, 4, 4, 'S');
     doc.setFontSize(10); doc.setTextColor(100, 116, 139); doc.text('ATHLETE', 30, 105);
@@ -3220,7 +3225,7 @@ function drawCoverPage(doc, a, w, h) {
     doc.setTextColor(255, 255, 255); doc.setFontSize(11);
     doc.text(new Date(Math.max(...a.sessions.map(s => s.date))).toLocaleDateString('tr-TR'), 140, 152);
     doc.setFontSize(10); doc.setTextColor(100, 116, 139);
-    doc.text('AI pose + Explosiveness Triad + AMRAP + Stable Queue', w / 2, h - 40, { align: 'center' });
+    doc.text('AI pose + Explosiveness Triad + Stable Queue', w / 2, h - 40, { align: 'center' });
     doc.setFontSize(8); doc.text('Data processed locally', w / 2, h - 34, { align: 'center' });
     doc.text(`Report: ${new Date().toLocaleString('tr-TR')}`, w / 2, h - 24, { align: 'center' });
 }
@@ -3290,9 +3295,6 @@ function buildSummaryTable(a) {
         const fr = fs.summary?.totalReps || fs.liveEstimate?.totalReps || 0;
         const lr = ls.summary?.totalReps || ls.liveEstimate?.totalReps || 0;
         if (fr && lr) rows.push([`${type} · Tekrar`, fr.toString(), lr.toString(), `${pctChange(fr, lr) > 0 ? '+' : ''}${pctChange(fr, lr)}%`]);
-        const ff = fs.summary?.fatigue?.index || fs.liveEstimate?.fatigue?.index || 0;
-        const lf = ls.summary?.fatigue?.index || ls.liveEstimate?.fatigue?.index || 0;
-        if (ff && lf) rows.push([`${type} · Yorgunluk`, `%${ff}`, `%${lf}`, `${pctChange(ff, lf) > 0 ? '+' : ''}${pctChange(ff, lf)}%`]);
     });
     return rows.length ? rows : [['Karsilastirma yok', '—', '—', '—']];
 }
@@ -3395,7 +3397,7 @@ function drawExercisePage(doc, a, type, w, h, margin) {
         return;
     }
 
-    // Standart egzersizler
+    // Standart egzersizler (hipMap blok artık yok — gallery sayfasında)
     const rows = tests.map(({ date, test }) => {
         if (test.refined) return [
             new Date(date).toLocaleDateString('tr-TR'), `${test.refined.jumpHeightCm}cm`,
@@ -3415,15 +3417,6 @@ function drawExercisePage(doc, a, type, w, h, margin) {
         }
         y = doc.lastAutoTable.finalY + 12;
     } catch (e) { rows.forEach(row => { doc.text(row.join('  |  '), margin, y); y += 4.5; }); y += 8; }
-    const lastR = tests.slice().reverse().find(t => t.test.refined?.hipMap);
-    if (lastR && y < h - 90) {
-        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
-        doc.text('Kalca Konum Haritasi', margin, y); y += 6;
-        try {
-            const img = renderHipMapToDataURL(lastR.test.refined.hipMap, 800, 240);
-            if (img) { doc.addImage(img, 'PNG', margin, y, w - 2 * margin, 55); y += 62; }
-        } catch (_) {}
-    }
 }
 function renderHipMapToDataURL(hipMap, width, height) {
     if (!hipMap || hipMap.length < 3) return null;
@@ -3463,6 +3456,153 @@ function renderHipMapToDataURL(hipMap, width, height) {
     cx.fillText(`Sure: ${(maxT / 1000).toFixed(2)}s`, 10, height - 6);
     return c.toDataURL('image/png');
 }
+
+// 🆕 HipMap Gallery - Tüm sıçramaların haritası (sayfa doldukça yeni sayfa)
+function drawHipMapGalleryPage(doc, a, w, h, margin) {
+    const pageH = h;
+
+    // Başlık
+    doc.setFontSize(22); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+    doc.text('HipMap Gallery', margin, 25);
+    doc.setDrawColor(251, 191, 36); doc.setLineWidth(1.5); doc.line(margin, 29, margin + 40, 29);
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+    doc.text('Tum sicrama tekrarlarinin kalca konum haritalari', margin, 36);
+
+    // Tüm JUMP ve DROPJUMP tekrarlarını topla
+    const allReps = [];
+    a.sessions.forEach(session => {
+        session.tests.forEach(test => {
+            if (test.type !== 'JUMP' && test.type !== 'DROPJUMP') return;
+            const sessionDate = new Date(session.date).toLocaleDateString('tr-TR');
+
+            // Refined varsa (altın standart) — tek rep
+            if (test.refined?.hipMap) {
+                allReps.push({
+                    date: sessionDate,
+                    type: test.type,
+                    jumpCm: test.refined.jumpHeightCm || 0,
+                    trochCm: test.refined.trochanterCm || 0,
+                    power: test.refined.sayersPowerW || 0,
+                    hipMap: test.refined.hipMap,
+                    isRefined: true,
+                    repIndex: 1,
+                });
+            }
+            // Live estimate (canlı) — birden çok rep olabilir
+            else if (test.summary?.results && Array.isArray(test.summary.results)) {
+                test.summary.results.forEach((rep, idx) => {
+                    if (rep.hipMap) {
+                        allReps.push({
+                            date: sessionDate,
+                            type: test.type,
+                            jumpCm: rep.jumpHeightCm || 0,
+                            trochCm: rep.trochanterCm || 0,
+                            power: rep.sayersPowerW || 0,
+                            hipMap: rep.hipMap,
+                            isRefined: false,
+                            repIndex: idx + 1,
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    if (allReps.length === 0) {
+        doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+        doc.text('Kayitli hipMap verisi yok.', margin, 55);
+        return;
+    }
+
+    // Bilgi satırı
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+    doc.text(`Toplam ${allReps.length} tekrar gosteriliyor.`, margin, 44);
+
+    // Grid ayarları
+    const cols = 2;
+    const cardW = (w - 2 * margin - 8) / cols;
+    const cardH = 72;
+    const gapY = 8;
+    const startY = 52;
+    const maxY = pageH - margin - 15;
+
+    let y = startY;
+    let col = 0;
+
+    allReps.forEach((rep) => {
+        // Yeni satıra geçilecek mi?
+        if (col >= cols) {
+            col = 0;
+            y += cardH + gapY;
+        }
+
+        // Sayfa taşacak mı? Yeni sayfa aç
+        if (y + cardH > maxY) {
+            doc.addPage();
+            doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+            doc.text('HipMap Gallery (devam)', margin, 20);
+            doc.setDrawColor(251, 191, 36); doc.setLineWidth(1); doc.line(margin, 24, margin + 40, 24);
+            y = 32;
+            col = 0;
+        }
+
+        const x = margin + col * (cardW + 8);
+
+        // Kart arkaplanı
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
+
+        // Kart sol renk şeridi (tip rengi)
+        const accentColor = rep.type === 'DROPJUMP' ? [244, 63, 94] : [251, 191, 36];
+        doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+        doc.roundedRect(x, y, 3, cardH, 1.5, 1.5, 'F');
+
+        // Başlık: Tarih + Test tipi + Rep no
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+        doc.text(`${rep.date}  ·  ${rep.type}${rep.repIndex > 1 || !rep.isRefined ? ` #${rep.repIndex}` : ''}`, x + 6, y + 7);
+
+        // Sıçrama yüksekliği (büyük)
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(16, 185, 129);
+        doc.text(`${rep.jumpCm} cm`, x + 6, y + 17);
+
+        // Ek bilgiler
+        doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+        doc.text(`Trokanter: ${rep.trochCm}cm  ·  Guc: ${rep.power}W`, x + 6, y + 23);
+        if (rep.isRefined) {
+            doc.setFillColor(251, 191, 36);
+            doc.roundedRect(x + cardW - 22, y + 3, 18, 5, 1, 1, 'F');
+            doc.setFontSize(6); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
+            doc.text('GOLD', x + cardW - 18, y + 6.7);
+        }
+
+        // HipMap grafiği
+        try {
+            const img = renderHipMapToDataURL(rep.hipMap, 700, 200);
+            if (img) {
+                const imgX = x + 5;
+                const imgY = y + 28;
+                const imgW = cardW - 10;
+                const imgH = cardH - 34;
+                doc.addImage(img, 'PNG', imgX, imgY, imgW, imgH);
+            }
+        } catch (e) {
+            doc.setFontSize(8); doc.setTextColor(200, 100, 100);
+            doc.text('Grafik cizilemedi', x + 6, y + 40);
+        }
+
+        col++;
+    });
+
+    // Sayfa numaraları
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8); doc.setTextColor(150);
+        doc.text(`Azythos HipMap Gallery · ${a.name}`, margin, pageH - 8);
+        doc.text(`Sayfa ${i} / ${totalPages}`, w - margin, pageH - 8, { align: 'right' });
+    }
+}
+
 async function drawProgressCharts(doc, a, w, h, margin) {
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
     doc.text('Progress Charts', margin, 25);
@@ -3485,7 +3625,7 @@ async function drawProgressCharts(doc, a, w, h, margin) {
             const rsi = sessions.map(s => s.test.refined?.rsi || s.test.summary?.avgRSI || 0);
             const reps = sessions.map(s => s.test.summary?.totalReps || s.test.liveEstimate?.totalReps || 0);
             const fatigue = sessions.map(s => s.test.summary?.fatigue?.index || s.test.liveEstimate?.fatigue?.index || 0);
-            const hasRSI = rsi.some(v => v > 0), hasReps = reps.some(v => v > 0), hasFatigue = fatigue.some(v => v > 0);
+            const hasRSI = rsi.some(v => v > 0);
 
             const isAMRAP = type === 'AMRAP';
             const datasets = isAMRAP
@@ -3506,7 +3646,7 @@ async function drawProgressCharts(doc, a, w, h, margin) {
             if (isAMRAP) scales.y1 = { beginAtZero: true, position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } };
             if (!isAMRAP && hasRSI) scales.y2 = { beginAtZero: true, position: 'right', title: { display: true, text: 'RSI' }, grid: { drawOnChartArea: false } };
 
-            inst = new Chart(cv, { type: 'line', data: { labels, datasets }, options: { animation: false, responsive: false, devicePixelRatio: 1, plugins: { legend: { position: 'top', labels: { font: { size: 12 } } }, title: { display: true, text: type + ' · Progress', font: { size: 16 } } }, scales } });
+            inst = new Chart(cv, { type: 'line', data: { labels, datasets }, options: { animation: false, responsive: false, devicePixelRatio: 1, plugins: { legend: { position: 'top', labels: { font: { size: 12 } } }, title: { display: true, text: type + ' Progress', font: { size: 16 } } }, scales } });
             await new Promise(r => setTimeout(r, 800));
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
             const img = cv.toDataURL('image/png');
@@ -3540,7 +3680,7 @@ function drawCoachingPage(doc, a, w, margin) {
     });
     y += 10; doc.setDrawColor(230); doc.line(margin, y, w - margin, y); y += 10;
     doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(140);
-    const disc = 'Bu rapor MediaPipe ve Azythos Motion v9.9 Ultimate algoritmasi ile otomatik olusturulmustur. Tibbi tani degildir.';
+    const disc = 'Bu rapor MediaPipe ve Azythos Motion v9.9 algoritmasi ile otomatik olusturulmustur. Tibbi tani degildir.';
     const lines = doc.splitTextToSize(disc, w - 2 * margin);
     doc.text(lines, margin, y);
 }
@@ -3722,7 +3862,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ac !== null) { STATE.autoCleanupEnabled = ac === '1'; document.getElementById('autoCleanupToggle').checked = STATE.autoCleanupEnabled; }
         } catch (_) {}
 
-        STATE.log('🚀 Azythos Motion v9.9 ULTIMATE hazır', 'success');
+        STATE.log('🚀 Azythos Motion v9.9 hazır', 'success');
         document.getElementById('telMode').textContent = '—';
         document.getElementById('telProgress').textContent = 'Beklemede';
         updateGlobalDisplay(); updateCalibrationBadge();
@@ -3763,14 +3903,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP');
+        console.log('◈ Azythos Motion v9.9 · HipMap Gallery eklendi');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
     }
 });
 
-// Global exports
 window.startMode = startMode;
 window.startAMRAP = startAMRAP;
 window.stopAMRAP = stopAMRAP;
