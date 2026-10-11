@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azythos Motion v9.9 · Stabil + AMRAP</title>
+    <title>Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP + HipMap</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -81,7 +81,7 @@
         @keyframes cam-spin{to{transform:rotate(360deg)}}
         .cam-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-secondary);background:rgba(2,6,23,.88);backdrop-filter:blur(14px);padding:3px 10px;border-radius:40px;border:1px solid var(--border-subtle);white-space:nowrap}
         .hud-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
-        .hud-top-left{position:absolute;top:20px;left:20px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
+        .hud-top-left{position:absolute;top:20px;left:20px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;transition:opacity .3s}
         .hud-badge{background:rgba(2,6,23,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:8px 18px;border-radius:40px;border:1px solid var(--border-subtle);font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--text-secondary);letter-spacing:.3px}
         .hud-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-emerald);box-shadow:0 0 12px rgba(16,185,129,.5)}
         .hud-badge .dot.warn{background:var(--accent-amber);box-shadow:0 0 12px rgba(251,191,36,.5)}
@@ -114,7 +114,7 @@
         .amrap-limit-warn{position:absolute;top:24px;right:24px;font-size:12px;color:var(--accent-amber);background:rgba(251,191,36,.18);padding:8px 16px;border-radius:40px;font-weight:800;letter-spacing:1px;border:1px solid rgba(251,191,36,.4)}
         .amrap-limit-progress{position:absolute;top:24px;left:24px;font-size:12px;color:var(--accent-violet);background:rgba(139,92,246,.18);padding:8px 16px;border-radius:40px;font-weight:800;font-family:var(--font-mono);border:1px solid rgba(139,92,246,.4)}
         @media (max-width:600px){.amrap-counter{font-size:100px}.amrap-timer{font-size:26px}.amrap-stop-btn{padding:18px 32px;font-size:16px;bottom:20px;right:20px}}
-        .postprocess-badge{position:absolute;bottom:24px;right:24px;background:rgba(2,6,23,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--accent-amber);border-radius:var(--radius-sm);padding:12px 16px;z-index:25;display:none;min-width:220px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.6);pointer-events:auto}
+        .postprocess-badge{position:absolute;bottom:24px;right:24px;background:rgba(2,6,23,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--accent-amber);border-radius:var(--radius-sm);padding:12px 16px;z-index:25;display:none;min-width:220px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.6);pointer-events:auto;transition:bottom .3s}
         .postprocess-badge.visible{display:block;animation:slide-up .35s var(--transition-smooth)}
         .postprocess-badge .ppb-header{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--accent-amber);margin-bottom:6px;text-transform:uppercase}
         .postprocess-badge .ppb-header .ppb-icon{font-size:14px;animation:pulse-dot 1.2s ease-in-out infinite}
@@ -335,7 +335,7 @@
             <div style="margin-top:8px;font-size:11px;color:var(--text-dim);" id="calibHint">Aktif sporcu seçilirse sporcunun profili kullanılır.</div>
         </div>
         <div class="card" style="border-color:var(--accent-cyan);">
-            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9</span></div>
+            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9 ULT</span></div>
             <div class="control-row" style="justify-content:flex-start;gap:16px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalUpper" checked onchange="updateGlobalDisplay()"> Üst</label>
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalLower" checked onchange="updateGlobalDisplay()"> Alt</label>
@@ -615,7 +615,15 @@
 
 <script>
 // =============================================================
-// v9.9 · STABIL + AMRAP + HIPMAP GALLERY
+// v9.9 ULTIMATE · MELEZ SÜRÜM · 3 FIX + HipMap Gallery + Kritik Bug Fix
+// 🔥 FIX 1: Rest time formülü (pushStartTime - lastRepTime)
+// 🔥 FIX 2: AMRAP sırasında HUD gizlenir
+// 🔥 FIX 3: Postprocess badge AMRAP sırasında 90px yukarı
+// 🐛 BUG 1: RSI birimi m/s (cm/s değil)
+// 🐛 BUG 2: getAngleDeg null döner (hayalet tekrar önlenir)
+// 🐛 BUG 3: parseInt || 1 → NaN kontrolü
+// 🐛 BUG 4: Deadlift/Lunge özet üretir
+// 🐛 BUG 5: Klavye kısayolları input'ta tetiklenmez
 // =============================================================
 
 window.addEventListener('error', function (e) {
@@ -624,7 +632,7 @@ window.addEventListener('error', function (e) {
 });
 window.addEventListener('unhandledrejection', function (e) { console.error('Unhandled rejection:', e.reason); });
 window.addEventListener('beforeunload', function (e) {
-    if (STATE && (STATE.postProcessQueue.length > 0 || STATE.postProcessing || STATE.isRecording)) {
+    if (STATE && (STATE.postProcessQueue.length > 0 || STATE.postProcessing || STATE.isRecording || (STATE.recorder && STATE.recorder.state === 'recording'))) {
         e.preventDefault();
         e.returnValue = 'Kuyrukta videolar var veya kayıt devam ediyor. Çıkmak istediğinize emin misiniz?';
         return e.returnValue;
@@ -906,9 +914,10 @@ function computeRFD({ hipMap, bodyWeightKg, analysisStartFrame, analysisEndFrame
     }
     return { rfdNs: Math.round(maxRFD), rfdNsPerKg: Math.round(maxRFD / bodyWeightKg) };
 }
+// 🐛 BUG FIX 1: RSI artık m/s döner (uluslararası standart). Eşikler: 2.5 m/s elit.
 function computeRSI(jumpHeightCm, groundContactMs) {
     if (!groundContactMs || groundContactMs <= 0) return 0;
-    return +(jumpHeightCm / (groundContactMs / 1000)).toFixed(2);
+    return +((jumpHeightCm / 100) / (groundContactMs / 1000)).toFixed(2);
 }
 
 function interpretPushVelocity(v) {
@@ -927,12 +936,13 @@ function interpretRFD(r) {
     if (r >= 20) return { level: 'mid', label: 'Orta RFD', color: 'amber', text: 'Ağır squat/deadlift önerilir.' };
     return { level: 'weak', label: 'Zayıf RFD', color: 'rose', text: 'Patlayıcı antrenman şart.' };
 }
+// RSI eşikleri m/s cinsinden (uluslararası literatür)
 function interpretRSI(r) {
     if (!r) return { level: 'unknown', label: 'Ölçülmedi', color: 'text-dim', text: '' };
-    if (r >= 3.5) return { level: 'elite', label: 'Elit RSI', color: 'emerald', text: 'Dünya standartı.' };
-    if (r >= 2.5) return { level: 'verygood', label: 'Çok İyi RSI', color: 'cyan', text: 'Profesyonel futbolcu seviyesi.' };
-    if (r >= 2.0) return { level: 'good', label: 'İyi RSI', color: 'blue', text: 'İyi elastik geri dönüş.' };
-    if (r >= 1.5) return { level: 'mid', label: 'Orta RSI', color: 'amber', text: 'Plyometrik ile geliştirilebilir.' };
+    if (r >= 2.5) return { level: 'elite', label: 'Elit RSI', color: 'emerald', text: 'Dünya standartı.' };
+    if (r >= 2.0) return { level: 'verygood', label: 'Çok İyi RSI', color: 'cyan', text: 'Profesyonel futbolcu seviyesi.' };
+    if (r >= 1.5) return { level: 'good', label: 'İyi RSI', color: 'blue', text: 'İyi elastik geri dönüş.' };
+    if (r >= 1.0) return { level: 'mid', label: 'Orta RSI', color: 'amber', text: 'Plyometrik ile geliştirilebilir.' };
     return { level: 'weak', label: 'Zayıf RSI', color: 'rose', text: 'Sekme/drop jump antrenmanı önerilir.' };
 }
 function interpretChain(c) {
@@ -942,7 +952,7 @@ function interpretChain(c) {
     return { level: 'critical', label: 'Kritik Core Zayıflığı', color: 'rose', detail: 'Acil core programı.' };
 }
 function interpretExplosiveProfile(pv, rfd, rsi) {
-    const pvG = pv && pv >= 1.5, rfG = rfd && rfd >= 30, rsG = rsi && rsi >= 2.0;
+    const pvG = pv && pv >= 1.5, rfG = rfd && rfd >= 30, rsG = rsi && rsi >= 1.5;
     if (pvG && rfG && rsG) return { label: 'Tam Patlayıcı', color: 'emerald', text: 'Her üç boyutta güçlü.' };
     if (pvG && rfG && !rsG) return { label: 'Nöral İyi, Elastik Zayıf', color: 'amber', text: 'Sekme/drop jump ekleyin.' };
     if (pvG && !rfG && rsG) return { label: 'Elastik İyi, Nöral Zayıf', color: 'amber', text: 'Ağır kuvvet ekleyin.' };
@@ -954,7 +964,7 @@ function interpretExplosiveProfile(pv, rfd, rsi) {
 function initDB() {
     return new Promise((resolve) => {
         try {
-            const req = indexedDB.open('AzythosMotionDB', 12);
+            const req = indexedDB.open('AzythosMotionDB', 13);
             req.onupgradeneeded = (e) => {
                 const d = e.target.result;
                 if (!d.objectStoreNames.contains('records')) d.createObjectStore('records', { keyPath: 'id' });
@@ -1129,7 +1139,10 @@ function getCameraResolution() {
     return { width: 1280, height: 720, frameRate: { ideal: 120, min: 30 } };
 }
 async function createPose() {
-    const complexity = parseInt(document.getElementById('modelComplexity').value) || 1;
+    // 🐛 BUG FIX 3: parseInt "0" dönerse || 1 ile yanlışlıkla 1 yapılıyordu
+    const rawVal = document.getElementById('modelComplexity').value;
+    const parsed = parseInt(rawVal, 10);
+    const complexity = Number.isNaN(parsed) ? 1 : parsed;
     if (STATE.pose) { try { await STATE.pose.close(); } catch (_) {} STATE.pose = null; }
     STATE.pose = new Pose({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}` });
     STATE.pose.setOptions({
@@ -1165,7 +1178,7 @@ async function setupPose() {
     document.getElementById('hudStatus').textContent = 'Hazır';
     updateCamLabel();
     await checkActualCameraFps();
-    speak('Azythos Motion v9.9 hazır.');
+    speak('Azythos Motion v9.9 Ultimate hazır.');
 }
 async function restartCamera() {
     if (STATE.camera) { try { await STATE.camera.stop(); } catch (_) {} STATE.camera = null; }
@@ -1220,16 +1233,15 @@ async function switchCamera() {
 }
 
 function onPoseResults(results) {
-    ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (canvas.width !== results.image?.width) {
         canvas.width = results.image?.width || 1280;
         canvas.height = results.image?.height || 720;
     }
     if (results.image) {
-        if (STATE.mirror) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+        if (STATE.mirror) { ctx.save(); ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
         ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-        if (STATE.mirror) ctx.setTransform(1, 0, 0, 1, 0, 0);
+        if (STATE.mirror) ctx.restore();
     }
     if (results.poseLandmarks) {
         let lm = results.poseLandmarks;
@@ -1238,7 +1250,6 @@ function onPoseResults(results) {
         drawSkeleton(lm);
         if (STATE.mode !== 'IDLE') runBiometrics(lm);
     }
-    ctx.restore();
 }
 function drawSkeleton(lm) {
     const w = canvas.width, h = canvas.height;
@@ -1304,6 +1315,7 @@ function runBiometrics(lm) {
             b.lastHip = undefined; b.lastTime = 0; b.v = undefined;
             b.phase = 'IDLE';
             b.plankTarget = parseInt(document.getElementById('plankDuration')?.value) || 30;
+            b.lungeReps = []; b.deadliftReps = [];
             speak('Başlayın!');
             STATE.log(`🔴 Analiz başladı: ${mode}`, 'success');
             updateHUD('BUSY');
@@ -1363,6 +1375,14 @@ function startAMRAPRecording() {
     b.lastRepTime = performance.now();
     b.running = true;
 
+    // 🔥 FIX 2: HUD'u gizle (AMRAP badge'leriyle çakışmasın)
+    const hud = document.querySelector('.hud-top-left');
+    if (hud) hud.style.display = 'none';
+
+    // 🔥 FIX 3: Postprocess badge'i yukarı taşı (durdur butonuyla çakışmasın)
+    const ppBadge = document.getElementById('postProcessBadge');
+    if (ppBadge) ppBadge.style.bottom = '90px';
+
     const exLabel = { pushup:'ŞINAV', squat:'SQUAT', situp:'MEKİK', pullup:'BARFİKS', plank:'PLANK' }[b.exercise];
     document.getElementById('amrapExBadge').textContent = exLabel;
     document.getElementById('amrapCounter').textContent = b.exercise === 'plank' ? '0.0s' : '0';
@@ -1390,6 +1410,11 @@ function stopAMRAP() {
         updateHUD('IDLE');
         document.getElementById('telemetryPanel').classList.remove('visible');
         document.getElementById('chartWrap').classList.remove('visible');
+        // FIX 2/3: İptal durumunda da HUD ve badge'i geri getir
+        const hud = document.querySelector('.hud-top-left');
+        if (hud) hud.style.display = 'flex';
+        const ppBadge = document.getElementById('postProcessBadge');
+        if (ppBadge) ppBadge.style.bottom = '24px';
         return;
     }
     b.running = false;
@@ -1430,36 +1455,52 @@ function calcAMRAP(lm) {
         if (orient === 'side') {
             const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
             const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
-            deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+            const a = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+            if (a === null) return; deg = a;
         } else {
-            deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+            const ar = getAngleDeg(lm[11], lm[13], lm[15]);
+            const al = getAngleDeg(lm[12], lm[14], lm[16]);
+            if (ar === null && al === null) return;
+            deg = ((ar ?? 180) + (al ?? 180)) / 2;
         }
         isDown = deg < 100; isUp = deg > 150;
     } else if (ex === 'squat') {
         if (orient === 'side') {
             const visR = (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0) + (lm[27]?.visibility || 0);
             const visL = (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0) + (lm[28]?.visibility || 0);
-            deg = visR >= visL ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
+            const a = visR >= visL ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
+            if (a === null) return; deg = a;
         } else {
-            deg = (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
+            const ar = getAngleDeg(lm[23], lm[25], lm[27]);
+            const al = getAngleDeg(lm[24], lm[26], lm[28]);
+            if (ar === null && al === null) return;
+            deg = ((ar ?? 180) + (al ?? 180)) / 2;
         }
         isDown = deg < 115; isUp = deg > 150;
     } else if (ex === 'situp') {
         if (orient === 'side') {
             const visR = (lm[11]?.visibility || 0) + (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0);
             const visL = (lm[12]?.visibility || 0) + (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0);
-            deg = visR >= visL ? getAngleDeg(lm[11], lm[23], lm[25]) : getAngleDeg(lm[12], lm[24], lm[26]);
+            const a = visR >= visL ? getAngleDeg(lm[11], lm[23], lm[25]) : getAngleDeg(lm[12], lm[24], lm[26]);
+            if (a === null) return; deg = a;
         } else {
-            deg = (getAngleDeg(lm[11], lm[23], lm[25]) + getAngleDeg(lm[12], lm[24], lm[26])) / 2;
+            const ar = getAngleDeg(lm[11], lm[23], lm[25]);
+            const al = getAngleDeg(lm[12], lm[24], lm[26]);
+            if (ar === null && al === null) return;
+            deg = ((ar ?? 180) + (al ?? 180)) / 2;
         }
         isDown = deg < 100; isUp = deg > 130;
     } else if (ex === 'pullup') {
         if (orient === 'front') {
-            deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+            const ar = getAngleDeg(lm[11], lm[13], lm[15]);
+            const al = getAngleDeg(lm[12], lm[14], lm[16]);
+            if (ar === null && al === null) return;
+            deg = ((ar ?? 180) + (al ?? 180)) / 2;
         } else {
             const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
             const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
-            deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+            const a = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
+            if (a === null) return; deg = a;
         }
         isDown = deg < 100; isUp = deg > 150;
     }
@@ -1476,7 +1517,14 @@ function calcAMRAP(lm) {
     if (b.bothDown && isUp && b.pushCooldown === 0 && (performance.now() - b.pushStartTime > 250)) {
         const repDuration = performance.now() - b.pushStartTime;
         const now = performance.now();
-        const restTime = b.reps.length > 0 ? Math.max(0, now - b.lastRepTime - b.reps[b.reps.length - 1].dur) : 0;
+
+        // 🔥 FIX 1: DOĞRU rest time formülü
+        // b.pushStartTime = bu rep'in başlangıcı (aşağı faz)
+        // b.lastRepTime = önceki rep'in bittiği an
+        // Fark = tekrarlar arası gerçek dinlenme süresi
+        const restTime = b.reps.length > 0
+            ? Math.max(0, b.pushStartTime - b.lastRepTime)
+            : 0;
 
         b.reps.push({
             index: b.reps.length + 1,
@@ -1529,8 +1577,11 @@ function computeAMRAPFatigue(b) {
     const reps = b.reps;
     const n = reps.length;
     const quarter = Math.max(2, Math.floor(n / 4));
-    const firstReps = reps.slice(0, quarter);
-    const lastReps = reps.slice(-quarter);
+    // Küçük setlerde first ve last quarter'ın örtüşmesini engelle
+    const firstEnd = Math.min(quarter, Math.floor(n / 2));
+    const lastStart = Math.max(n - quarter, firstEnd);
+    const firstReps = reps.slice(0, firstEnd);
+    const lastReps = reps.slice(lastStart);
     const avgDurFirst = firstReps.reduce((s, r) => s + r.dur, 0) / firstReps.length;
     const avgDurLast = lastReps.reduce((s, r) => s + r.dur, 0) / lastReps.length;
     const durChangePct = avgDurFirst > 0 ? ((avgDurLast - avgDurFirst) / avgDurFirst) * 100 : 0;
@@ -1643,7 +1694,7 @@ function renderAMRAPFatigueChart(reps) {
 }
 
 // =============================================================
-// Diger testler
+// Diğer testler
 // =============================================================
 function calcJump(lm) {
     const b = STATE.brain.jump;
@@ -1681,7 +1732,6 @@ function calcJump(lm) {
             const takeoffIdx = b.hipMap.length - 1;
             const analysisStart = Math.max(0, takeoffIdx - Math.round(150 * 30 / 1000));
             const rfd = computeRFD({ hipMap: b.hipMap, bodyWeightKg: bodyWeight, analysisStartFrame: analysisStart, analysisEndFrame: takeoffIdx, fps: 30 });
-            const pushInterp = interpretPushVelocity(pushVelocity);
             b.hipMap.forEach(p => { if (p.t > b.jumpTime - b.testStartTime) p.phase = 'flight'; });
             const repHipMap = b.hipMap.slice();
             const result = {
@@ -1801,7 +1851,7 @@ function calcDropJump(lm) {
         document.getElementById('telDynamic').innerHTML = `
             <div class="t-row"><span class="t-label">📏 Yükseklik</span><span class="t-value highlight">${jumpHeightCm} cm</span></div>
             <div class="t-row"><span class="t-label">⚡ Zirve Güç</span><span class="t-value">${sayersW} W</span></div>
-            <div class="t-row"><span class="t-label">🔄 RSI</span><span class="t-value highlight">${rsi}</span></div>
+            <div class="t-row"><span class="t-label">🔄 RSI</span><span class="t-value highlight">${rsi} m/s</span></div>
             <div class="t-row" style="font-size:10px;color:var(--accent-${rsiInterp.color});"><span></span><span>${rsiInterp.label}</span></div>
             <div class="t-row" style="color:var(--accent-amber);font-size:10px;"><span>💥 RFD post-process'te</span></div>
         `;
@@ -1838,11 +1888,17 @@ function calcSquat(lm) {
         const visR = (lm[23]?.visibility || 0) + (lm[25]?.visibility || 0) + (lm[27]?.visibility || 0);
         const visL = (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0) + (lm[28]?.visibility || 0);
         deg = visR >= visL ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
-    } else deg = (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
+    } else {
+        const aR = getAngleDeg(lm[23], lm[25], lm[27]);
+        const aL = getAngleDeg(lm[24], lm[26], lm[28]);
+        if (aR === null && aL === null) return;
+        deg = ((aR ?? 180) + (aL ?? 180)) / 2;
+    }
+    if (deg === null) return;
     const cfg = STATE.brain.load.squat || { mode: 'none', weight: 0, bodyWeight: 75 };
     const userHeightCm = getAthleteHeight();
     const pxc = estimatePixelPerCm(lm, userHeightCm);
-    if (pxc > 0) b.pxPerCm = b.pxPerCm ? b.pxPerCm * 0.95 + pxc * 0.05 : pxc;
+    if (pxc > 0) b.pxPerCm = b.pxPerCm ? b.pxPerCm * 0.8 + pxc * 0.2 : pxc;
     const hipY = orient === 'side' ? (lm[23]?.visibility > lm[24]?.visibility ? lm[23].y : lm[24].y) : (lm[23].y + lm[24].y) / 2;
     if (!b.isDown && deg < 115) { b.isDown = true; b.bestDeg = 180; b.squatStart = Date.now(); b.topHipY = hipY; b.bottomHipY = hipY; }
     if (b.isDown) {
@@ -1887,32 +1943,61 @@ function calcPushup(lm) {
         const visR = (lm[11]?.visibility || 0) + (lm[13]?.visibility || 0) + (lm[15]?.visibility || 0);
         const visL = (lm[12]?.visibility || 0) + (lm[14]?.visibility || 0) + (lm[16]?.visibility || 0);
         deg = visR >= visL ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
-    } else deg = (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+    } else {
+        const aR = getAngleDeg(lm[11], lm[13], lm[15]);
+        const aL = getAngleDeg(lm[12], lm[14], lm[16]);
+        if (aR === null && aL === null) return;
+        deg = ((aR ?? 180) + (aL ?? 180)) / 2;
+    }
+    if (deg === null) return;
     if (b.pushCooldown > 0) b.pushCooldown--;
     const isDown = deg < 100, isUp = deg > 150;
     updateTelemetry('Dirsek Açısı', `${Math.round(deg)}°`, isDown ? '⬇ Aşağı' : isUp ? '⬆ Yukarı' : '—');
     if (!b.bothDown && isDown && b.pushCooldown === 0) { b.bothDown = true; b.pushStartTime = Date.now(); }
     if (b.bothDown && isUp && b.pushCooldown === 0 && (Date.now() - (b.pushStartTime || 0) > 300)) {
         STATE.metrics.push(`${STATE.doneReps + 1}. push-up`); STATE.doneReps++;
-        b.bothDown = false; b.pushCooldown = 20; speak('Güzel'); updateProgress();
+        b.bothDown = false; b.pushCooldown = 20; updateProgress();
         if (STATE.doneReps >= STATE.goalReps) finishMode(1500);
     }
     if (b.bothDown && (Date.now() - (b.pushStartTime || 0) > 8000)) { b.bothDown = false; b.pushCooldown = 10; }
 }
+// 🐛 BUG FIX 4: Lunge simetri özeti + knee açıları null kontrolü
 function calcLunge(lm) {
     const b = STATE.brain.lunge;
-    const kneeR = getAngleDeg(lm[23], lm[25], lm[27]), kneeL = getAngleDeg(lm[24], lm[26], lm[28]);
-    updateTelemetry('Diz R/L', `${Math.round(kneeR)}° / ${Math.round(kneeL)}°`, '');
-    if (!b.isDown && (kneeR < 110 || kneeL < 110)) { b.isDown = true; b.lungeStart = Date.now(); b.bestR = 180; b.bestL = 180; }
+    const kneeR = getAngleDeg(lm[23], lm[25], lm[27]);
+    const kneeL = getAngleDeg(lm[24], lm[26], lm[28]);
+    if (kneeR === null && kneeL === null) return;
+    const kr = kneeR ?? 180, kl = kneeL ?? 180;
+    updateTelemetry('Diz R/L', `${Math.round(kr)}° / ${Math.round(kl)}°`, '');
+    if (!b.isDown && (kr < 110 || kl < 110)) { b.isDown = true; b.lungeStart = Date.now(); b.bestR = 180; b.bestL = 180; }
     if (b.isDown) {
-        if (kneeR < b.bestR) b.bestR = kneeR;
-        if (kneeL < b.bestL) b.bestL = kneeL;
-        if (kneeR > 140 && kneeL > 140 && (Date.now() - b.lungeStart > 500)) {
+        if (kr < b.bestR) b.bestR = kr;
+        if (kl < b.bestL) b.bestL = kl;
+        if (kr > 140 && kl > 140 && (Date.now() - b.lungeStart > 500)) {
+            const dur = Date.now() - b.lungeStart;
+            b.lungeReps = b.lungeReps || [];
+            b.lungeReps.push({ index: b.lungeReps.length + 1, bestR: Math.round(b.bestR), bestL: Math.round(b.bestL), durationSec: +(dur/1000).toFixed(2) });
             STATE.doneReps++; b.isDown = false; updateProgress();
-            if (STATE.doneReps >= STATE.goalReps) finishMode(1500);
+            if (STATE.doneReps >= STATE.goalReps) { b.finalSummary = computeLungeSummary(b); finishMode(1500); }
         }
     }
 }
+function computeLungeSummary(b) {
+    if (!b.lungeReps?.length) return null;
+    const reps = b.lungeReps;
+    const avg = k => reps.reduce((s, r) => s + r[k], 0) / reps.length;
+    const avgR = avg('bestR'), avgL = avg('bestL');
+    const asymmetry = Math.abs(avgR - avgL);
+    const dominant = avgR < avgL ? 'Sağ' : avgL < avgR ? 'Sol' : 'Simetrik';
+    return {
+        exercise: 'lunge', reps: reps.length,
+        avgKneeR: Math.round(avgR), avgKneeL: Math.round(avgL),
+        asymmetryDeg: Math.round(asymmetry), dominant,
+        avgDuration: +avg('durationSec').toFixed(2),
+        symmetryPct: +(100 - asymmetry).toFixed(1),
+    };
+}
+// 🐛 BUG FIX 4: Deadlift özeti + null kontrolü
 function calcDeadlift(lm) {
     const b = STATE.brain.deadlift;
     const orient = getActiveOrientation();
@@ -1922,11 +2007,47 @@ function calcDeadlift(lm) {
         const visL = (lm[12]?.visibility || 0) + (lm[24]?.visibility || 0) + (lm[26]?.visibility || 0);
         angle = visR >= visL ? getAngleDeg(lm[11], lm[23], lm[25]) : getAngleDeg(lm[12], lm[24], lm[26]);
     } else angle = getAngleDeg(lm[11], lm[23], lm[25]);
-    if (!b.isDown && angle < 120) { b.isDown = true; b.deadliftStart = Date.now(); }
-    if (b.isDown && angle > 160 && (Date.now() - b.deadliftStart > 500)) {
-        STATE.doneReps++; b.isDown = false; updateProgress();
-        if (STATE.doneReps >= STATE.goalReps) finishMode(1500);
+    if (angle === null) return;
+    const cfg = STATE.brain.load.deadlift || { mode: 'none', weight: 0, bodyWeight: 75 };
+    const userHeightCm = getAthleteHeight();
+    const pxc = estimatePixelPerCm(lm, userHeightCm);
+    if (pxc > 0) b.pxPerCm = b.pxPerCm ? b.pxPerCm * 0.8 + pxc * 0.2 : pxc;
+    const hipY = orient === 'side' ? (lm[23]?.visibility > lm[24]?.visibility ? lm[23].y : lm[24].y) : (lm[23].y + lm[24].y) / 2;
+    if (!b.isDown && angle < 120) { b.isDown = true; b.bestAngle = angle; b.deadliftStart = Date.now(); b.topHipY = hipY; b.bottomHipY = hipY; }
+    if (b.isDown) {
+        if (angle < b.bestAngle) b.bestAngle = angle;
+        if (hipY > (b.bottomHipY || 0)) b.bottomHipY = hipY;
+        if (angle > 160 && (Date.now() - b.deadliftStart > 500)) {
+            const durationMs = Date.now() - b.deadliftStart;
+            let movedCm = pxToCm(Math.abs((b.bottomHipY || 0) - (b.topHipY || 0)), b.pxPerCm);
+            if (movedCm < 10 || movedCm > 120) movedCm = angularROMToCm(170 - b.bestAngle, 0, userHeightCm, 'torso') * 0.6;
+            const power = computeRepower({ weightKg: cfg.weight, bodyWeightKg: cfg.bodyWeight, mode: cfg.mode, movedCm, durationMs });
+            b.reps = b.reps || [];
+            b.reps.push({ index: STATE.doneReps + 1, leanDeg: Math.round(180 - b.bestAngle), romCm: Math.round(movedCm), durationSec: +(durationMs/1000).toFixed(2), loadKg: cfg.mode === 'weighted' ? cfg.weight : 0, loadMode: cfg.mode, power });
+            STATE.doneReps++;
+            b.isDown = false; b.bestAngle = 180; b.bottomHipY = 0;
+            if (power) speak(`${Math.round(power.powerW)} watt`);
+            updateProgress();
+            if (STATE.doneReps >= STATE.goalReps) { b.finalSummary = computeDeadliftSummary(b, cfg); finishMode(1500); }
+        }
     }
+}
+function computeDeadliftSummary(b, cfg) {
+    if (!b.reps?.length) return null;
+    const reps = b.reps;
+    const avg = k => reps.reduce((s, r) => s + (r[k] || 0), 0) / reps.length;
+    const powers = reps.filter(r => r.power).map(r => r.power.powerW);
+    const peak = powers.length ? Math.max(...powers) : 0;
+    const avgP = powers.length ? powers.reduce((a, x) => a + x, 0) / powers.length : 0;
+    return {
+        exercise: 'deadlift', loadMode: cfg.mode, loadKg: cfg.mode === 'weighted' ? cfg.weight : 0,
+        bodyWeight: cfg.bodyWeight, reps: reps.length,
+        avgLean: Math.round(avg('leanDeg')), avgRomCm: Math.round(avg('romCm')),
+        avgDuration: +avg('durationSec').toFixed(2),
+        avgPowerW: Math.round(avgP), peakPowerW: Math.round(peak),
+        avgPowerPerKg: cfg.bodyWeight ? +(avgP / cfg.bodyWeight).toFixed(2) : 0,
+        totalWorkJ: +reps.reduce((s, r) => s + (r.power?.workJ || 0), 0).toFixed(1),
+    };
 }
 function calcPlank(lm) {
     const b = STATE.brain.plank;
@@ -1939,7 +2060,7 @@ function calcPlank(lm) {
     } else angle = getAngleDeg(lm[11], lm[23], lm[27]);
     const elapsed = (Date.now() - b.plankStart) / 1000;
     const target = b.plankTarget || 30;
-    const isGood = angle > 170 && angle < 190;
+    const isGood = angle !== null && angle > 170 && angle < 190;
     if (isGood) b.plankGood = (b.plankGood || 0) + 1;
     updateTelemetry('Plank', `${elapsed.toFixed(1)}s / ${target}s`, `Pozisyon: ${isGood ? '✅ İyi' : '⚠️ Düzelt'}`);
     if (elapsed >= target) { STATE.metrics.push(`Plank: ${target}s`); finishMode(1500); }
@@ -1952,17 +2073,29 @@ function getPowerAngle(lm, exercise) {
         return vR >= vL ? 'R' : 'L';
     };
     if (exercise === 'curl') {
-        if (orient === 'front') return (getAngleDeg(lm[11], lm[13], lm[15]) + getAngleDeg(lm[12], lm[14], lm[16])) / 2;
+        if (orient === 'front') {
+            const a = getAngleDeg(lm[11], lm[13], lm[15]), b = getAngleDeg(lm[12], lm[14], lm[16]);
+            if (a === null && b === null) return null;
+            return ((a ?? 180) + (b ?? 180)) / 2;
+        }
         const s = pick([11,13,15], [12,14,16]);
         return s === 'R' ? getAngleDeg(lm[11], lm[13], lm[15]) : getAngleDeg(lm[12], lm[14], lm[16]);
     }
     if (exercise === 'press' || exercise === 'row') {
-        if (orient === 'front') return (getAngleDeg(lm[23], lm[11], lm[13]) + getAngleDeg(lm[24], lm[12], lm[14])) / 2;
+        if (orient === 'front') {
+            const a = getAngleDeg(lm[23], lm[11], lm[13]), b = getAngleDeg(lm[24], lm[12], lm[14]);
+            if (a === null && b === null) return null;
+            return ((a ?? 180) + (b ?? 180)) / 2;
+        }
         const s = pick([23,11,13], [24,12,14]);
         return s === 'R' ? getAngleDeg(lm[23], lm[11], lm[13]) : getAngleDeg(lm[24], lm[12], lm[14]);
     }
     if (exercise === 'legcurl') {
-        if (orient === 'front') return (getAngleDeg(lm[23], lm[25], lm[27]) + getAngleDeg(lm[24], lm[26], lm[28])) / 2;
+        if (orient === 'front') {
+            const a = getAngleDeg(lm[23], lm[25], lm[27]), b = getAngleDeg(lm[24], lm[26], lm[28]);
+            if (a === null && b === null) return null;
+            return ((a ?? 180) + (b ?? 180)) / 2;
+        }
         const s = pick([23,25,27], [24,26,28]);
         return s === 'R' ? getAngleDeg(lm[23], lm[25], lm[27]) : getAngleDeg(lm[24], lm[26], lm[28]);
     }
@@ -1972,7 +2105,7 @@ function calcPower(lm) {
     const b = STATE.brain.power;
     if (!b || b.exercise === undefined) return;
     const rawAngle = getPowerAngle(lm, b.exercise);
-    if (!rawAngle || isNaN(rawAngle)) return;
+    if (rawAngle === null || !rawAngle || isNaN(rawAngle)) return;
     b.smoothAngle = b.smoothAngle === undefined ? rawAngle : b.smoothAngle * 0.65 + rawAngle * 0.35;
     const angle = b.smoothAngle;
     if (b.lastAngle === undefined) { b.lastAngle = angle; b.phase = 'IDLE'; b.troughAngle = angle; b.peakAngle = angle; b.phaseStart = performance.now(); return; }
@@ -2048,8 +2181,10 @@ function calcFree(lm) {
     updateTelemetry('Serbest', `${rem.toFixed(1)}s`, `Y: %${hipY}`);
     if (elapsed >= b.freeDur) { STATE.metrics.push(`Süre: ${b.freeDur}s`); finishMode(1500); }
 }
+// 🐛 BUG FIX 2: getAngleDeg artık null döner (görünürlük < 0.5 ise)
 function getAngleDeg(a, b, c) {
-    if (!a || !b || !c) return 0;
+    if (!a || !b || !c) return null;
+    if ((a.visibility ?? 1) < 0.5 || (b.visibility ?? 1) < 0.5 || (c.visibility ?? 1) < 0.5) return null;
     const r = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
     let d = Math.abs(r * 180 / Math.PI);
     return d > 180 ? 360 - d : d;
@@ -2194,7 +2329,9 @@ function stopRecording() {
         else if (STATE.currentMode === 'power' && STATE.brain.power?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.power.finalSummary);
         else if (STATE.currentMode === 'jump' && STATE.brain.jump?.finalSummary) STATE.metrics = formatJumpMetrics(STATE.brain.jump.finalSummary);
         else if (STATE.currentMode === 'dropjump' && STATE.brain.dropjump?.finalSummary) STATE.metrics = formatDropJumpMetrics(STATE.brain.dropjump.finalSummary);
-        else if (['squat', 'deadlift', 'lunge'].includes(STATE.currentMode) && STATE.brain[STATE.currentMode]?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain[STATE.currentMode].finalSummary);
+        else if (STATE.currentMode === 'lunge' && STATE.brain.lunge?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.lunge.finalSummary);
+        else if (STATE.currentMode === 'deadlift' && STATE.brain.deadlift?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.deadlift.finalSummary);
+        else if (STATE.currentMode === 'squat' && STATE.brain.squat?.finalSummary) STATE.metrics = formatPowerMetrics(STATE.brain.squat.finalSummary);
         STATE.recorder.stop();
         STATE.recorder.onstop = async () => {
             const blob = new Blob(STATE.chunks, { type: STATE.recorder.mimeType });
@@ -2223,7 +2360,16 @@ function finishCleanup() {
     document.getElementById('countdownOverlay').classList.remove('show');
     document.getElementById('countdownOverlay').textContent = '';
     document.getElementById('amrapOverlay').classList.remove('visible');
-    if (STATE.chart) { STATE.chart.data.datasets[0].data = []; STATE.chart.update(); }
+
+    // 🔥 FIX 2: HUD'u geri getir
+    const hud = document.querySelector('.hud-top-left');
+    if (hud) hud.style.display = 'flex';
+
+    // 🔥 FIX 3: Postprocess badge konumunu sıfırla
+    const ppBadge = document.getElementById('postProcessBadge');
+    if (ppBadge) ppBadge.style.bottom = '24px';
+
+    if (STATE.chart) { STATE.chart.data.datasets[0].data = []; STATE.chartData = []; STATE.chart.update(); }
     STATE.log('⏸️ Sistem beklemede', 'info');
 }
 async function saveRecord(blob) {
@@ -2442,6 +2588,7 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
         }
         const refinedResult = {
             jumpHeightCm, trochanterCm, sayersPowerW, powerPerKg, chainEfficiency,
+            samozinoPowerW: samozino?.peakPowerW || null,
             flightTimeSec: +flightTimeSec.toFixed(3), fps: useFps, bodyWeightKg: bodyWeight,
             pushOffMs: Math.round(pushOffMs), pushVelocity,
             rfdNs: rfd?.rfdNs || null, rfdNsPerKg: rfd?.rfdNsPerKg || null,
@@ -2449,6 +2596,7 @@ async function runPostProcessJob(videoBlob, recordId, mode) {
             groundContactMs: groundContactMs ? Math.round(groundContactMs) : null,
             hipMap: downsampleHipMap(hipCmHistory, 3),
             refined: true, processedAt: Date.now(),
+            lowFpsWarn: useFps < 60,
         };
         await updateRecordWithRefinedData(recordId, refinedResult);
         showToast(`🏆 Altın standart hazır: ${jumpHeightCm}cm · ${sayersPowerW}W`, 'success', 6000);
@@ -2502,7 +2650,6 @@ async function updateRecordWithRefinedData(recordId, refined) {
         }
         renderHistory();
         if (STATE.currentAthlete) renderSessions();
-        STATE.log('✅ Refined veri güncellendi', 'success');
     } catch (e) { STATE.log('⚠️ Güncelleme hatası: ' + e.message, 'error'); }
 }
 function formatJumpMetrics(s) {
@@ -2540,18 +2687,17 @@ function formatDropJumpMetrics(s) {
             `📏 Yükseklik: ${s.jumpHeightCm} cm`,
             `⚡ Güç: ${s.sayersPowerW} W`,
         ];
-        if (s.rsi) lines.push(`🔄 RSI: ${s.rsi}`);
+        if (s.rsi) lines.push(`🔄 RSI: ${s.rsi} m/s`);
         if (s.groundContactMs) lines.push(`🦶 Yerde: ${s.groundContactMs} ms`);
         if (s.pushVelocity) lines.push(`🚀 İtme Hızı: ${s.pushVelocity} m/s`);
         if (s.rfdNsPerKg) lines.push(`💥 RFD: ${s.rfdNsPerKg} N/s/kg`);
-        if (s.warning) lines.push(`⚠️ ${s.warning}`);
         if (s.lowFpsWarn) lines.push(`⚠️ Düşük FPS`);
         return lines;
     }
     return [
         `🔄 DROP JUMP (canlı)`,
         `📏 Yükseklik: ${s.avgJumpCm} cm`,
-        `🔄 RSI: ${s.avgRSI} (En iyi: ${s.bestRSI})`,
+        `🔄 RSI: ${s.avgRSI} m/s (En iyi: ${s.bestRSI})`,
         `⚡ Güç: ${s.avgSayersPower} W`,
         `🦶 Yerde: ${s.avgGroundContactMs} ms`,
     ];
@@ -2561,6 +2707,13 @@ function formatPowerMetrics(s) {
     if (s.exercise === 'amrap') return formatAMRAPMetrics(s);
     if (s.exercise === 'jump' && s.refined) return formatJumpMetrics(s);
     if (s.exercise === 'dropjump') return formatDropJumpMetrics(s);
+    if (s.exercise === 'lunge') return [
+        `🦵 LUNGE SİMETRİ`,
+        `Sağ: ${s.avgKneeR}° · Sol: ${s.avgKneeL}°`,
+        `Asimetri: ${s.asymmetryDeg}° (${s.dominant} dominant)`,
+        `Simetri Skoru: %${s.symmetryPct}`,
+        `Ort. Süre: ${s.avgDuration}s`,
+    ];
     if (s.avgCycle !== undefined) return [
         `Ağırlık: ${s.weight}kg`, `Ort. Döngü: ${s.avgCycle}s`,
         `Ort. Konsantrik: ${s.avgCon}ms`, `Ort. Eksantrik: ${s.avgEcc}ms`,
@@ -2568,7 +2721,7 @@ function formatPowerMetrics(s) {
     ];
     if (['squat', 'deadlift', 'lunge'].includes(s.exercise)) return [
         `Yük: ${s.loadMode === 'weighted' ? s.loadKg + 'kg' : 'BW'}`,
-        `Derinlik: ${s.avgDepth}°`, `ROM: ${s.avgRomCm}cm`,
+        `Derinlik: ${s.avgDepth || s.avgLean}°`, `ROM: ${s.avgRomCm}cm`,
         `Süre: ${s.avgDuration}s`, `Ort. Güç: ${s.avgPowerW} W`,
         `Peak: ${s.peakPowerW} W`, `W/kg: ${s.avgPowerPerKg}`,
     ];
@@ -2650,14 +2803,14 @@ async function renderHistory() {
         if ((isJump || isDrop) && (live || refined)) {
             jumpBlock = `<div class="dev-panel ${refined ? 'refined-data' : ''}">`;
             if (refined) {
-                const interp = refined.explosiveProfile || refined.rsiInterp || refined.chainInterp;
                 jumpBlock += `
                     <div style="color:var(--accent-amber);font-size:10px;margin-bottom:6px;font-weight:800;">🏆 ALTIN STANDART (${refined.fps}fps)${refined.lowFpsWarn ? ' <span class="fps-warn">⚠️ DÜŞÜK FPS</span>' : ''}</div>
                     <div class="dev-row"><span>📏 Sıçrama</span><span class="dev-up">${refined.jumpHeightCm} cm</span></div>
                     <div class="dev-row"><span>🔗 Kinetik</span><span class="dev-up">${refined.trochanterCm} cm (%${refined.chainEfficiency})</span></div>
                     <div class="dev-row"><span>⚡ Güç</span><span class="dev-up">${refined.sayersPowerW} W</span></div>
+                    ${refined.samozinoPowerW ? `<div class="dev-row"><span>🔬 Samozino</span><span>${refined.samozinoPowerW} W</span></div>` : ''}
                     ${refined.rfdNsPerKg ? `<div class="dev-row"><span>💥 RFD</span><span>${refined.rfdNsPerKg} N/s/kg</span></div>` : ''}
-                    ${refined.rsi ? `<div class="dev-row"><span>🔄 RSI</span><span class="dev-up">${refined.rsi}</span></div>` : ''}
+                    ${refined.rsi ? `<div class="dev-row"><span>🔄 RSI</span><span class="dev-up">${refined.rsi} m/s</span></div>` : ''}
                     ${refined.hipMap ? `<div class="hipmap-container" data-hipmap-id="${item.id}"><canvas class="hipmap-canvas"></canvas><div class="hipmap-legend"><div class="lg"><span class="lg-dot" style="background:#8b5cf6;"></span>Ön</div><div class="lg"><span class="lg-dot" style="background:#fbbf24;"></span>İtiş</div><div class="lg"><span class="lg-dot" style="background:#22d3ee;"></span>Uçuş</div><div class="lg"><span class="lg-dot" style="background:#f43f5e;"></span>Zirve</div></div></div>` : ''}
                 `;
             } else if (live) {
@@ -3168,7 +3321,7 @@ async function generateAthletePDF() {
         a.sessions.forEach(s => s.tests.forEach(t => typesInAll.add(t.type)));
         typesInAll.forEach(type => { doc.addPage(); drawExercisePage(doc, a, type, pageW, pageH, margin); });
 
-        // HipMap Gallery Sayfası (JUMP veya DROPJUMP varsa)
+        // HipMap Gallery Sayfası
         if (typesInAll.has('JUMP') || typesInAll.has('DROPJUMP')) {
             doc.addPage();
             drawHipMapGalleryPage(doc, a, pageW, pageH, margin);
@@ -3320,7 +3473,7 @@ function drawExercisePage(doc, a, type, w, h, margin) {
     let y = 25;
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
     doc.text(`${type} Analysis`, margin, y);
-    y += 4; 
+    y += 4;
     const accent = type === 'AMRAP' ? [139, 92, 246] : type === 'JUMP' || type === 'DROPJUMP' ? [251, 191, 36] : [59, 130, 246];
     doc.setDrawColor(accent[0], accent[1], accent[2]); doc.setLineWidth(1); doc.line(margin, y, margin + 30, y);
     y += 12;
@@ -3397,7 +3550,7 @@ function drawExercisePage(doc, a, type, w, h, margin) {
         return;
     }
 
-    // Standart egzersizler (hipMap blok artık yok — gallery sayfasında)
+    // Standart egzersizler
     const rows = tests.map(({ date, test }) => {
         if (test.refined) return [
             new Date(date).toLocaleDateString('tr-TR'), `${test.refined.jumpHeightCm}cm`,
@@ -3456,51 +3609,38 @@ function renderHipMapToDataURL(hipMap, width, height) {
     cx.fillText(`Sure: ${(maxT / 1000).toFixed(2)}s`, 10, height - 6);
     return c.toDataURL('image/png');
 }
-
-// 🆕 HipMap Gallery - Tüm sıçramaların haritası (sayfa doldukça yeni sayfa)
 function drawHipMapGalleryPage(doc, a, w, h, margin) {
     const pageH = h;
-
-    // Başlık
     doc.setFontSize(22); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
     doc.text('HipMap Gallery', margin, 25);
     doc.setDrawColor(251, 191, 36); doc.setLineWidth(1.5); doc.line(margin, 29, margin + 40, 29);
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
     doc.text('Tum sicrama tekrarlarinin kalca konum haritalari', margin, 36);
 
-    // Tüm JUMP ve DROPJUMP tekrarlarını topla
     const allReps = [];
     a.sessions.forEach(session => {
         session.tests.forEach(test => {
             if (test.type !== 'JUMP' && test.type !== 'DROPJUMP') return;
             const sessionDate = new Date(session.date).toLocaleDateString('tr-TR');
-
-            // Refined varsa (altın standart) — tek rep
             if (test.refined?.hipMap) {
                 allReps.push({
-                    date: sessionDate,
-                    type: test.type,
+                    date: sessionDate, type: test.type,
                     jumpCm: test.refined.jumpHeightCm || 0,
                     trochCm: test.refined.trochanterCm || 0,
                     power: test.refined.sayersPowerW || 0,
                     hipMap: test.refined.hipMap,
-                    isRefined: true,
-                    repIndex: 1,
+                    isRefined: true, repIndex: 1,
                 });
-            }
-            // Live estimate (canlı) — birden çok rep olabilir
-            else if (test.summary?.results && Array.isArray(test.summary.results)) {
+            } else if (test.summary?.results && Array.isArray(test.summary.results)) {
                 test.summary.results.forEach((rep, idx) => {
                     if (rep.hipMap) {
                         allReps.push({
-                            date: sessionDate,
-                            type: test.type,
+                            date: sessionDate, type: test.type,
                             jumpCm: rep.jumpHeightCm || 0,
                             trochCm: rep.trochanterCm || 0,
                             power: rep.sayersPowerW || 0,
                             hipMap: rep.hipMap,
-                            isRefined: false,
-                            repIndex: idx + 1,
+                            isRefined: false, repIndex: idx + 1,
                         });
                     }
                 });
@@ -3514,11 +3654,9 @@ function drawHipMapGalleryPage(doc, a, w, h, margin) {
         return;
     }
 
-    // Bilgi satırı
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
     doc.text(`Toplam ${allReps.length} tekrar gosteriliyor.`, margin, 44);
 
-    // Grid ayarları
     const cols = 2;
     const cardW = (w - 2 * margin - 8) / cols;
     const cardH = 72;
@@ -3530,42 +3668,24 @@ function drawHipMapGalleryPage(doc, a, w, h, margin) {
     let col = 0;
 
     allReps.forEach((rep) => {
-        // Yeni satıra geçilecek mi?
-        if (col >= cols) {
-            col = 0;
-            y += cardH + gapY;
-        }
-
-        // Sayfa taşacak mı? Yeni sayfa aç
+        if (col >= cols) { col = 0; y += cardH + gapY; }
         if (y + cardH > maxY) {
             doc.addPage();
             doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
             doc.text('HipMap Gallery (devam)', margin, 20);
             doc.setDrawColor(251, 191, 36); doc.setLineWidth(1); doc.line(margin, 24, margin + 40, 24);
-            y = 32;
-            col = 0;
+            y = 32; col = 0;
         }
-
         const x = margin + col * (cardW + 8);
-
-        // Kart arkaplanı
         doc.setFillColor(248, 250, 252);
         doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
-
-        // Kart sol renk şeridi (tip rengi)
         const accentColor = rep.type === 'DROPJUMP' ? [244, 63, 94] : [251, 191, 36];
         doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
         doc.roundedRect(x, y, 3, cardH, 1.5, 1.5, 'F');
-
-        // Başlık: Tarih + Test tipi + Rep no
         doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
         doc.text(`${rep.date}  ·  ${rep.type}${rep.repIndex > 1 || !rep.isRefined ? ` #${rep.repIndex}` : ''}`, x + 6, y + 7);
-
-        // Sıçrama yüksekliği (büyük)
         doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(16, 185, 129);
         doc.text(`${rep.jumpCm} cm`, x + 6, y + 17);
-
-        // Ek bilgiler
         doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
         doc.text(`Trokanter: ${rep.trochCm}cm  ·  Guc: ${rep.power}W`, x + 6, y + 23);
         if (rep.isRefined) {
@@ -3574,8 +3694,6 @@ function drawHipMapGalleryPage(doc, a, w, h, margin) {
             doc.setFontSize(6); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
             doc.text('GOLD', x + cardW - 18, y + 6.7);
         }
-
-        // HipMap grafiği
         try {
             const img = renderHipMapToDataURL(rep.hipMap, 700, 200);
             if (img) {
@@ -3589,11 +3707,9 @@ function drawHipMapGalleryPage(doc, a, w, h, margin) {
             doc.setFontSize(8); doc.setTextColor(200, 100, 100);
             doc.text('Grafik cizilemedi', x + 6, y + 40);
         }
-
         col++;
     });
 
-    // Sayfa numaraları
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
@@ -3602,7 +3718,6 @@ function drawHipMapGalleryPage(doc, a, w, h, margin) {
         doc.text(`Sayfa ${i} / ${totalPages}`, w - margin, pageH - 8, { align: 'right' });
     }
 }
-
 async function drawProgressCharts(doc, a, w, h, margin) {
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 14, 26);
     doc.text('Progress Charts', margin, 25);
@@ -3644,7 +3759,7 @@ async function drawProgressCharts(doc, a, w, h, margin) {
             };
             if (!isAMRAP) scales.y1 = { beginAtZero: true, position: 'right', title: { display: true, text: 'cm' }, grid: { drawOnChartArea: false } };
             if (isAMRAP) scales.y1 = { beginAtZero: true, position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } };
-            if (!isAMRAP && hasRSI) scales.y2 = { beginAtZero: true, position: 'right', title: { display: true, text: 'RSI' }, grid: { drawOnChartArea: false } };
+            if (!isAMRAP && hasRSI) scales.y2 = { beginAtZero: true, position: 'right', title: { display: true, text: 'RSI (m/s)' }, grid: { drawOnChartArea: false } };
 
             inst = new Chart(cv, { type: 'line', data: { labels, datasets }, options: { animation: false, responsive: false, devicePixelRatio: 1, plugins: { legend: { position: 'top', labels: { font: { size: 12 } } }, title: { display: true, text: type + ' Progress', font: { size: 16 } } }, scales } });
             await new Promise(r => setTimeout(r, 800));
@@ -3862,7 +3977,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ac !== null) { STATE.autoCleanupEnabled = ac === '1'; document.getElementById('autoCleanupToggle').checked = STATE.autoCleanupEnabled; }
         } catch (_) {}
 
-        STATE.log('🚀 Azythos Motion v9.9 hazır', 'success');
+        STATE.log('🚀 Azythos Motion v9.9 ULTIMATE hazır (3 fix + 5 bug fix)', 'success');
         document.getElementById('telMode').textContent = '—';
         document.getElementById('telProgress').textContent = 'Beklemede';
         updateGlobalDisplay(); updateCalibrationBadge();
@@ -3882,7 +3997,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             catch (e) { showToast('Model hatası', 'error'); }
         });
 
+        // 🐛 BUG FIX 5: Klavye kısayolları input/textarea/select'te tetiklenmesin
         document.addEventListener('keydown', (e) => {
+            const tag = (e.target && e.target.tagName) || '';
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return;
             if (e.key === 'f' || e.key === 'F') toggleFullscreen();
             if (e.key === 'h' || e.key === 'H') toggleHistory();
             if (e.key === 't' || e.key === 'T') toggleTheme();
@@ -3903,7 +4021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 · HipMap Gallery eklendi');
+        console.log('◈ Azythos Motion v9.9 ULTIMATE · Melez sürüm hazır');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
