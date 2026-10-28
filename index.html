@@ -489,6 +489,13 @@
                     <button class="btn btn-sm btn-outline load-toggle" id="trackType5105" onclick="setTrackType('5-10-5')">5-10-5</button>
                 </div>
             </div>
+<div class="control-row" id="trackDirectionRow" style="margin-bottom:8px;">
+    <label>Koşu Yönü</label>
+    <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm btn-outline load-toggle active" id="trackDirLR" onclick="setSprintDirection(1)">→ Sol→Sağ</button>
+        <button class="btn btn-sm btn-outline load-toggle" id="trackDirRL" onclick="setSprintDirection(-1)">← Sağ→Sol</button>
+    </div>
+</div>
             <div class="control-row" id="trackSprintDistanceRow" style="margin-bottom:8px;">
                 <label>Mesafe (m)</label>
                 <input type="number" id="trackTotalDistance" value="30" min="5" max="100" step="5">
@@ -743,17 +750,18 @@ const STATE = {
     MAX_QUEUE_SIZE: 5,
         brain: {
         jump: {}, dropjump: {}, squat: {}, pushup: {}, lunge: {}, deadlift: {}, plank: {}, power: {}, free: {}, amrap: {},
-        track: {
-            template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
-            triggerMode: 'standing', firstMoveDir: 1,
-            armFeedback: { visual: true, audio: true }, calibration: null,
-            runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
-                nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
-                armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
-                prevT: 0, placementIdx: 0, recordingStart: 0 },
-            result: { draft: null, refined: null, certified: null },
-            frames: [], events: [],
-        },
+       track: {
+    template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
+    triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,  // 🔥 YENİ
+    armFeedback: { visual: true, audio: true }, calibration: null,
+    runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
+        nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
+        armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
+        prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '',
+        hasBeenArmed: false },  // 🔥 YENİ: hasBeenArmed, hipXHistory, seekHint
+    result: { draft: null, refined: null, certified: null },
+    frames: [], events: [],
+},
         load: {
             squat: { mode: 'none', weight: 0, bodyWeight: 75 },
             deadlift: { mode: 'none', weight: 0, bodyWeight: 75 },
@@ -4331,7 +4339,8 @@ const TRACK_DEFAULTS = {
     sizeStabilityThreshold: 0.25,
     sizePlausibilityMin: 0.12,
     sizePlausibilityMax: 0.85,
-    rearwardReleaseM: 1.5, lostFramesTolerance: 15, recordingLostFault: 30,
+    rearwardReleaseM: 6.0,  // 🔥 1.5 → 6.0
+    lostFramesTolerance: 15, recordingLostFault: 30,
     maxFramesBuffer: 60 * 120,
 };
 
@@ -4372,21 +4381,30 @@ function setTrackFirstDir(dir) {
     document.getElementById('trackDirRight')?.classList.toggle('active', dir === 1);
     document.getElementById('trackDirLeft')?.classList.toggle('active', dir === -1);
 }
+function setSprintDirection(dir) {
+    const track = ensureTrackState();
+    track.sprintDirection = dir;
+    document.getElementById('trackDirLR')?.classList.toggle('active', dir === 1);
+    document.getElementById('trackDirRL')?.classList.toggle('active', dir === -1);
+    showToast(dir === 1 ? '→ Soldan sağa koşu' : '← Sağdan sola koşu', 'info', 2000);
+}
 
 function readTrackConfig() {
     const track = ensureTrackState();
     if (track.template === 'sprint') {
-        const total = parseFloat(document.getElementById('trackTotalDistance')?.value) || 30;
-        const count = Math.max(2, Math.min(6, parseInt(document.getElementById('trackCheckpointCount')?.value) || 2));
-        const distances = [0];
-        for (let i = 1; i < count - 1; i++) distances.push(Math.round((total / (count - 1)) * i));
-        distances.push(total);
-        track.checkpoints = distances.map((d, i) => ({
-            order: i, cumulativeD: d, approachDir: 1,
-            label: i === 0 ? 'start' : i === count - 1 ? 'finish' : 'split',
-            position: null, capturedAt: null, capturedVx: null, confidence: null,
-        }));
-    } else {
+    const total = parseFloat(document.getElementById('trackTotalDistance')?.value) || 30;
+    const count = Math.max(2, Math.min(6, parseInt(document.getElementById('trackCheckpointCount')?.value) || 2));
+    const sdir = track.sprintDirection || 1;  // 🔥 YENİ
+    const distances = [0];
+    for (let i = 1; i < count - 1; i++) distances.push(Math.round((total / (count - 1)) * i));
+    distances.push(total);
+    track.checkpoints = distances.map((d, i) => ({
+        order: i, cumulativeD: d, approachDir: sdir,  // 🔥 sdir kullan
+        label: i === 0 ? 'start' : i === count - 1 ? 'finish' : 'split',
+        position: null, capturedAt: null, capturedVx: null, confidence: null,
+    }));
+}
+ else {
         const fd = track.firstMoveDir, yd = 0.9144;
         const d1 = 5 * yd, d2 = d1 + 10 * yd, d3 = d2 + 5 * yd;
         track.checkpoints = [
@@ -4450,8 +4468,9 @@ function updateTrackPlacementHint() {
     if (!hint) return;
     if (idx < track.checkpoints.length) {
         const cp = track.checkpoints[idx];
-        if (cp.label === 'start') hint.textContent = '🟢 Başlangıç çizgisini yerleştir';
-        else if (cp.label === 'finish') hint.textContent = '🔴 Bitiş çizgisini yerleştir';
+const dirLabel = (track.sprintDirection === -1) ? ' (sağdan sola)' : ' (soldan sağa)';
+if (cp.label === 'start') hint.textContent = `🟢 Başlangıç çizgisini yerleştir${dirLabel}`;
+else if (cp.label === 'finish') hint.textContent = `🔴 Bitiş çizgisini yerleştir${dirLabel}`;
         else if (cp.label === 'turn') hint.textContent = `🟡 ${idx}. Dönüş konisini yerleştir`;
         else hint.textContent = `🟡 ${idx}. Çizgi (${cp.cumulativeD.toFixed(1)}m)`;
         sub.textContent = 'Canvas üzerinde dokun';
@@ -4517,9 +4536,10 @@ function computeTrackCalibration(track) {
     const range = Math.max(...pts.map(p => p.x)) - Math.min(...pts.map(p => p.x));
     const warnings = [];
     if (range > 0 && maxResidual / range > 0.08) warnings.push('koni-sapma');
-    const direction = pts[n - 1].x > pts[0].x ? 1 : -1;
-    return { pixelPerMeter: Math.abs(a) || 1, slope: a, intercept: b, direction, residual: range > 0 ? maxResidual / range : 0, method: 'linear', coneCount: n, warnings };
-}
+    const autoDirection = pts[n - 1].x > pts[0].x ? 1 : -1;
+// 🔥 Kullanıcı yön seçimi varsa onu kullan
+const direction = track.sprintDirection || autoDirection;
+return { pixelPerMeter: Math.abs(a) || 1, slope: a, intercept: b, direction, residual: range > 0 ? maxResidual / range : 0, method: 'linear', coneCount: n, warnings };
 
 function computeCoreBox(lm) {
     const indices = [0, 11, 12, 23, 24];
@@ -4593,20 +4613,23 @@ function enterTrackPhase(newPhase, reasonOrTime) {
     track.runtime.phase = newPhase;
     track.runtime.phaseEnteredAt = performance.now();
     if (newPhase === 'SEEKING') {
-        track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = [];
-        track.runtime.hipXHistory = []; // 🔥 FIX 2
-        track.runtime.seekHint = '';
-        hideArmedIndicator();
-        if (reasonOrTime === 'kayıp') showToast('⚠️ Sporcu kayboldu', 'warning', 3000);
-        if (reasonOrTime === 'yanlış yön') showToast('⚠️ Yanlış yöne koştu', 'warning', 3000);
-        if (reasonOrTime === 'geri') { /* sessiz */ }
-    }
+    track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = [];
+    track.runtime.hipXHistory = [];
+    track.runtime.seekHint = '';
+    track.runtime.hasBeenArmed = false;  // 🔥 YENİ — tekrar hazır olabilmesi için
+    hideArmedIndicator();
+    // ...
+}
         if (newPhase === 'ARMED') {
-        track.runtime.armedRearmostX = track.runtime.lastBoxFrontX;
-        showArmedIndicator();
-        if (track.armFeedback.audio) speak('Hazır');
-        startTrackRecording();
+    track.runtime.armedRearmostX = track.runtime.lastBoxFrontX;
+    showArmedIndicator();
+    // 🔥 Ses sadece 1 kez — tekrar tekrar çalmasın
+    if (track.armFeedback.audio && !track.runtime.hasBeenArmed) {
+        speak('Hazır');
+        track.runtime.hasBeenArmed = true;
     }
+    if (!STATE.isRecording) startTrackRecording();
+}
     if (newPhase === 'RECORDING') {
         hideArmedIndicator();
         const tCross = typeof reasonOrTime === 'number' ? reasonOrTime : performance.now();
@@ -4684,16 +4707,19 @@ function handleArmedTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, prevT) 
     const dir = track.calibration?.direction || 1;
     const startX = track.checkpoints[0].position;
     const boxFrontX = dir > 0 ? coreBox.maxX * canvasW : coreBox.minX * canvasW;
-    const behindPx = (startX - boxFrontX) * dir;
-    const behindM = behindPx / (track.calibration?.pixelPerMeter || 1);
-    if (behindM > TRACK_DEFAULTS.rearwardReleaseM) { enterTrackPhase('SEEKING', 'geri'); return; }
+
+    // 🔥 Rearward kontrolü SADECE 5-10-5'te — sprint'te sporcu zaten ileride olabilir
     if (track.template === '5-10-5') {
+        const behindPx = (startX - boxFrontX) * dir;
+        const behindM = behindPx / (track.calibration?.pixelPerMeter || 1);
+        if (behindM > TRACK_DEFAULTS.rearwardReleaseM) { enterTrackPhase('SEEKING', 'geri'); return; }
         if (Math.abs(hipVxMps) > TRACK_DEFAULTS.stationaryThresholdMs * 1.5) {
             const actualDir = hipVxMps > 0 ? 1 : -1;
             if (actualDir !== track.firstMoveDir) { enterTrackPhase('SEEKING', 'yanlış yön'); return; }
         }
     }
-        const tCross = checkCrossing(boxFrontX, startX, dir, prevT, now);
+
+    const tCross = checkCrossing(boxFrontX, startX, dir, prevT, now);
     if (tCross !== null) enterTrackPhase('RECORDING', tCross);
 }
 
@@ -4704,14 +4730,24 @@ function handleRecordingTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, pre
     if (track.frames.length < TRACK_DEFAULTS.maxFramesBuffer) {
         track.frames.push({ t: now, boxFrontX, boxCenterX: coreBox.centerX * canvasW, boxW: coreBox.width * canvasW, boxH: coreBox.height * canvasH, hipX: hip.x * canvasW, hipY: hip.y * canvasH, vx: hipVxMps, conf: Math.round((coreBox.confidence || 0) * 100) });
     }
+
+    // 🔥 Çoklu checkpoint yakalama — bir frame'de birden fazla çizgi geçilebilir
+    let iterations = 0;
+    while (track.runtime.nextCheckpointIdx < track.checkpoints.length && iterations < 10) {
+        iterations++;
         const idx = track.runtime.nextCheckpointIdx;
-    if (idx >= track.checkpoints.length) { enterTrackPhase('COMPLETE'); return; }
-    const cp = track.checkpoints[idx];
- const tCross = checkCrossing(boxFrontX, cp.position, cp.approachDir, prevT, now);
-    if (tCross !== null) {
-        captureTrackCheckpoint(idx, tCross);
-        track.runtime.nextCheckpointIdx++;
-        if (track.runtime.nextCheckpointIdx >= track.checkpoints.length) enterTrackPhase('COMPLETE');
+        const cp = track.checkpoints[idx];
+        const tCross = checkCrossing(boxFrontX, cp.position, cp.approachDir, prevT, now);
+        if (tCross !== null) {
+            captureTrackCheckpoint(idx, tCross);
+            track.runtime.nextCheckpointIdx++;
+        } else {
+            break;
+        }
+    }
+
+    if (track.runtime.nextCheckpointIdx >= track.checkpoints.length) {
+        enterTrackPhase('COMPLETE');
     }
 }
 
@@ -4738,6 +4774,19 @@ function captureTrackCheckpoint(idx, tCross) {
     cp.capturedVx = track.runtime.lastBoxFrontVx;
     cp.confidence = 90;
     track.events.push({ type: 'cross', idx, label: cp.label, t: tCross, d: cp.cumulativeD, vx: track.runtime.lastBoxFrontVx });
+
+    // 🔥 Her çizgi geçişinde canlı toast + ses (başlangıç hariç)
+    if (idx > 0) {
+        const startT = track.checkpoints[0].capturedAt || tCross;
+        const elapsed = (tCross - startT) / 1000;
+        const prevCp = track.checkpoints[idx - 1];
+        const prevT = prevCp?.capturedAt || startT;
+        const segT = (tCross - prevT) / 1000;
+        const segD = prevCp ? cp.cumulativeD - prevCp.cumulativeD : cp.cumulativeD;
+        const speed = segT > 0.01 ? (segD / segT).toFixed(2) : '—';
+        showToast(`✅ ${cp.cumulativeD.toFixed(1)}m · ${elapsed.toFixed(2)}s · ${speed} m/s`, 'success', 2500);
+        if (track.armFeedback.audio) speak(`${cp.cumulativeD.toFixed(0)} metre, ${elapsed.toFixed(1)} saniye`);
+    }
     updateTrackTelemetry();
 }
 
@@ -4793,7 +4842,25 @@ function updateTrackTelemetry() {
         html += `<span class="track-checkpoint-chip ${cls}">${label}</span>`;
     });
     html += '</div>';
-    // 🔥 FIX 2: Bekleme nedeni göster
+
+    // 🔥 CANLI SPLIT METRİKLERİ — her çizgi geçişinde metre + süre + hız
+    const capturedCps = track.checkpoints.filter(c => c.capturedAt);
+    if (capturedCps.length > 1) {
+        const startT = capturedCps[0].capturedAt;
+        html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);">';
+        html += '<div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">ÇİZGİ GEÇİŞLERİ</div>';
+        for (let i = 1; i < capturedCps.length; i++) {
+            const cp = capturedCps[i];
+            const prevCp = capturedCps[i - 1];
+            const t = (cp.capturedAt - startT) / 1000;
+            const segT = (cp.capturedAt - prevCp.capturedAt) / 1000;
+            const segD = cp.cumulativeD - prevCp.cumulativeD;
+            const speed = segT > 0.01 ? (segD / segT).toFixed(2) : '—';
+            html += `<div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--font-mono);padding:3px 0;"><span style="color:var(--text-secondary);">${cp.cumulativeD.toFixed(1)}m</span><span style="color:var(--accent-emerald);font-weight:700;">${t.toFixed(2)}s</span><span style="color:var(--accent-cyan);">${speed} m/s</span></div>`;
+        }
+        html += '</div>';
+    }
+
     if (track.runtime.phase === 'SEEKING' && track.runtime.seekHint) {
         html += `<div style="font-size:10px;color:var(--accent-amber);margin-top:6px;line-height:1.4;">${track.runtime.seekHint}</div>`;
     }
@@ -5709,6 +5776,7 @@ window.buildAthleteSharePackage = buildAthleteSharePackage;
 window.unifiedImport = unifiedImport;
 window.unifiedImportFileChange = unifiedImportFileChange;
 window.importRecordsBackup = importRecordsBackup;
+window.setSprintDirection = setSprintDirection;
 </script>
 </body>
 </html>
