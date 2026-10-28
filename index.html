@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azythos Motion v9.9 ULTIMATE · Stabil + AMRAP + HipMap</title>
+    <title>Azythos Motion v9.9 ULTIMATE · Hibrit</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -371,7 +371,7 @@
             <div style="margin-top:8px;font-size:11px;color:var(--text-dim);" id="calibHint">Aktif sporcu seçilirse sporcunun profili kullanılır.</div>
         </div>
         <div class="card" style="border-color:var(--accent-cyan);">
-            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9 ULT</span></div>
+            <div class="card-title"><span class="icon">⚙️</span> Sistem Ayarları <span class="badge">v9.9 HİBRİT</span></div>
             <div class="control-row" style="justify-content:flex-start;gap:16px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalUpper" checked onchange="updateGlobalDisplay()"> Üst</label>
                 <label style="display:flex;align-items:center;gap:6px;font-weight:600;text-transform:none;color:var(--text-primary);"><input type="checkbox" id="globalLower" checked onchange="updateGlobalDisplay()"> Alt</label>
@@ -478,7 +478,7 @@
             <div class="control-row"><label>Süre (sn)</label><input type="number" id="plankDuration" value="30" min="5" max="120"></div>
             <button class="btn btn-outline" style="border-color:var(--accent-cyan);color:var(--accent-cyan);" onclick="startMode('plank')">▶ Başlat</button>
         </div>
-        <!-- ====== KOŞU ALANI KARTI — v9.9 ====== -->
+
         <div class="card track-card" data-mode="track">
             <div class="card-title"><span class="icon">🏃</span> Koşu Alanı <span class="badge" style="background:linear-gradient(135deg,#10b981,#22d3ee);color:#0a0e1a;">SPRINT + ÇEVİKLİK</span></div>
             <div class="card-desc">Sprint veya 5-10-5 testi. Çizgileri yerleştir, sporcu geçince sayaç başlar.</div>
@@ -489,13 +489,13 @@
                     <button class="btn btn-sm btn-outline load-toggle" id="trackType5105" onclick="setTrackType('5-10-5')">5-10-5</button>
                 </div>
             </div>
-<div class="control-row" id="trackDirectionRow" style="margin-bottom:8px;">
-    <label>Koşu Yönü</label>
-    <div style="display:flex;gap:6px;">
-        <button class="btn btn-sm btn-outline load-toggle active" id="trackDirLR" onclick="setSprintDirection(1)">→ Sol→Sağ</button>
-        <button class="btn btn-sm btn-outline load-toggle" id="trackDirRL" onclick="setSprintDirection(-1)">← Sağ→Sol</button>
-    </div>
-</div>
+            <div class="control-row" id="trackDirectionRow" style="margin-bottom:8px;">
+                <label>Koşu Yönü</label>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-sm btn-outline load-toggle active" id="trackDirLR" onclick="setSprintDirection(1)">→ Sol→Sağ</button>
+                    <button class="btn btn-sm btn-outline load-toggle" id="trackDirRL" onclick="setSprintDirection(-1)">← Sağ→Sol</button>
+                </div>
+            </div>
             <div class="control-row" id="trackSprintDistanceRow" style="margin-bottom:8px;">
                 <label>Mesafe (m)</label>
                 <input type="number" id="trackTotalDistance" value="30" min="5" max="100" step="5">
@@ -513,9 +513,8 @@
             </div>
             <button class="btn btn-emerald" onclick="startTrackTest()">▶ Çizgileri Yerleştir</button>
         </div>
-        <!-- ====== /KOŞU ALANI ====== -->
 
-               <div class="card amrap-card" data-mode="amrap">
+        <div class="card amrap-card" data-mode="amrap">
             <div class="card-title"><span class="icon">🎯</span> Sınırsız Analiz <span class="badge" style="background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;">AMRAP</span></div>
             <div class="card-desc">Sporcu yapabildiği kadar yapar. Sistem otomatik sayar + yorgunluk analizi çıkarır.</div>
             <div class="control-row" style="margin-bottom:8px;">
@@ -569,7 +568,7 @@
             </div>
         </div>
 
-                <div class="card" style="border-color:var(--accent-blue);">
+        <div class="card" style="border-color:var(--accent-blue);">
             <div class="card-title"><span class="icon">💾</span> Veri Yönetimi <span class="badge">Premium</span></div>
             <div class="btn-group">
                 <button class="btn btn-sm btn-outline" onclick="exportData()">📤 Dışa Aktar</button>
@@ -699,15 +698,9 @@
 
 <script>
 // =============================================================
-// v9.9 ULTIMATE · MELEZ SÜRÜM · 3 FIX + HipMap Gallery + Kritik Bug Fix
-// 🔥 FIX 1: Rest time formülü (pushStartTime - lastRepTime)
-// 🔥 FIX 2: AMRAP sırasında HUD gizlenir
-// 🔥 FIX 3: Postprocess badge AMRAP sırasında 90px yukarı
-// 🐛 BUG 1: RSI birimi m/s (cm/s değil)
-// 🐛 BUG 2: getAngleDeg null döner (hayalet tekrar önlenir)
-// 🐛 BUG 3: parseInt || 1 → NaN kontrolü
-// 🐛 BUG 4: Deadlift/Lunge özet üretir
-// 🐛 BUG 5: Klavye kısayolları input'ta tetiklenmez
+// HİBRİT v9.9 · 1. dosya (tüm gelişmiş Track özellikleri)
+//             + 2. dosyanın computeTrackCalibration `}` fix'i
+//             + Ekstra tüm bug fix'ler korunmuştur
 // =============================================================
 
 window.addEventListener('error', function (e) {
@@ -748,20 +741,20 @@ const STATE = {
     activePostProcess: null,
     livePoseFrameSkip: 0,
     MAX_QUEUE_SIZE: 5,
-        brain: {
+    brain: {
         jump: {}, dropjump: {}, squat: {}, pushup: {}, lunge: {}, deadlift: {}, plank: {}, power: {}, free: {}, amrap: {},
-       track: {
-    template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
-    triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,  // 🔥 YENİ
-    armFeedback: { visual: true, audio: true }, calibration: null,
-    runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
-        nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
-        armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
-        prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '',
-        hasBeenArmed: false },  // 🔥 YENİ: hasBeenArmed, hipXHistory, seekHint
-    result: { draft: null, refined: null, certified: null },
-    frames: [], events: [],
-},
+        track: {
+            template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
+            triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,  // 🔥 YENİ
+            armFeedback: { visual: true, audio: true }, calibration: null,
+            runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
+                nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
+                armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
+                prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '',
+                hasBeenArmed: false },  // 🔥 YENİ: hasBeenArmed, hipXHistory, seekHint
+            result: { draft: null, refined: null, certified: null },
+            frames: [], events: [],
+        },
         load: {
             squat: { mode: 'none', weight: 0, bodyWeight: 75 },
             deadlift: { mode: 'none', weight: 0, bodyWeight: 75 },
@@ -808,7 +801,7 @@ canvas.addEventListener('click', (e) => {
     const canvasX = (relX / displayW) * cw;
     handleTrackPlacementClick(canvasX);
 });
-  function showToast(msg, type = 'info', duration = 4000) {
+function showToast(msg, type = 'info', duration = 4000) {
     const container = document.getElementById('toastContainer');
     if (!container) { console.log('[toast]', msg); return; }
     const toast = document.createElement('div');
@@ -1030,7 +1023,6 @@ function computeRFD({ hipMap, bodyWeightKg, analysisStartFrame, analysisEndFrame
     }
     return { rfdNs: Math.round(maxRFD), rfdNsPerKg: Math.round(maxRFD / bodyWeightKg) };
 }
-// 🐛 BUG FIX 1: RSI artık m/s döner (uluslararası standart). Eşikler: 2.5 m/s elit.
 function computeRSI(jumpHeightCm, groundContactMs) {
     if (!groundContactMs || groundContactMs <= 0) return 0;
     return +((jumpHeightCm / 100) / (groundContactMs / 1000)).toFixed(2);
@@ -1052,7 +1044,6 @@ function interpretRFD(r) {
     if (r >= 20) return { level: 'mid', label: 'Orta RFD', color: 'amber', text: 'Ağır squat/deadlift önerilir.' };
     return { level: 'weak', label: 'Zayıf RFD', color: 'rose', text: 'Patlayıcı antrenman şart.' };
 }
-// RSI eşikleri m/s cinsinden (uluslararası literatür)
 function interpretRSI(r) {
     if (!r) return { level: 'unknown', label: 'Ölçülmedi', color: 'text-dim', text: '' };
     if (r >= 2.5) return { level: 'elite', label: 'Elit RSI', color: 'emerald', text: 'Dünya standartı.' };
@@ -1255,7 +1246,6 @@ function getCameraResolution() {
     return { width: 1280, height: 720, frameRate: { ideal: 120, min: 30 } };
 }
 async function createPose() {
-    // 🐛 BUG FIX 3: parseInt "0" dönerse || 1 ile yanlışlıkla 1 yapılıyordu
     const rawVal = document.getElementById('modelComplexity').value;
     const parsed = parseInt(rawVal, 10);
     const complexity = Number.isNaN(parsed) ? 1 : parsed;
@@ -1294,7 +1284,7 @@ async function setupPose() {
     document.getElementById('hudStatus').textContent = 'Hazır';
     updateCamLabel();
     await checkActualCameraFps();
-    speak('Azythos Motion v9.9 Ultimate hazır.');
+    speak('Azythos Motion v9.9 Hibrit hazır.');
 }
 async function restartCamera() {
     if (STATE.camera) { try { await STATE.camera.stop(); } catch (_) {} STATE.camera = null; }
@@ -1336,7 +1326,6 @@ async function switchCamera() {
         document.getElementById('mirrorMode').checked = isFront;
         STATE.mirror = isFront;
         updateGlobalDisplay(); updateCamLabel();
-        // 🔥 FIX 1: Kamera yönünü kalıcı yap
         try { localStorage.setItem('azythos_facing_mode', STATE.facingMode); } catch (_) {}
         showToast(isFront ? '📱 Ön kamera' : '📷 Arka kamera', 'success', 2000);
     } catch (e) {
@@ -1365,7 +1354,7 @@ function onPoseResults(results) {
         let lm = results.poseLandmarks;
         if (STATE.mirror) lm = lm.map(p => ({ ...p, x: 1 - p.x }));
         maybeUpdateDetectedOrientation(lm);
-               drawSkeleton(lm);
+        drawSkeleton(lm);
         if (STATE.mode === 'TRACK') {
             drawTrackOverlay();
             runTrackBiometrics(lm);
@@ -1461,7 +1450,6 @@ function startAMRAP() {
     if (!STATE.cameraReady) { showToast('Kamera hazır değil', 'warning'); openPermOverlay(); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { showToast('⚠️ Önce mevcut testi bitirin', 'warning'); return; }
 
-    // 🔥 FIX 3: Kameraya otomatik kaydır
     scrollToCameraView();
 
     const ex = document.getElementById('amrapExercise')?.value || 'pushup';
@@ -1504,11 +1492,9 @@ function startAMRAPRecording() {
     b.lastRepTime = performance.now();
     b.running = true;
 
-    // 🔥 FIX 2: HUD'u gizle (AMRAP badge'leriyle çakışmasın)
     const hud = document.querySelector('.hud-top-left');
     if (hud) hud.style.display = 'none';
 
-    // 🔥 FIX 3: Postprocess badge'i yukarı taşı (durdur butonuyla çakışmasın)
     const ppBadge = document.getElementById('postProcessBadge');
     if (ppBadge) ppBadge.style.bottom = '90px';
 
@@ -1539,7 +1525,6 @@ function stopAMRAP() {
         updateHUD('IDLE');
         document.getElementById('telemetryPanel').classList.remove('visible');
         document.getElementById('chartWrap').classList.remove('visible');
-        // FIX 2/3: İptal durumunda da HUD ve badge'i geri getir
         const hud = document.querySelector('.hud-top-left');
         if (hud) hud.style.display = 'flex';
         const ppBadge = document.getElementById('postProcessBadge');
@@ -1647,10 +1632,6 @@ function calcAMRAP(lm) {
         const repDuration = performance.now() - b.pushStartTime;
         const now = performance.now();
 
-        // 🔥 FIX 1: DOĞRU rest time formülü
-        // b.pushStartTime = bu rep'in başlangıcı (aşağı faz)
-        // b.lastRepTime = önceki rep'in bittiği an
-        // Fark = tekrarlar arası gerçek dinlenme süresi
         const restTime = b.reps.length > 0
             ? Math.max(0, b.pushStartTime - b.lastRepTime)
             : 0;
@@ -1706,7 +1687,6 @@ function computeAMRAPFatigue(b) {
     const reps = b.reps;
     const n = reps.length;
     const quarter = Math.max(2, Math.floor(n / 4));
-    // Küçük setlerde first ve last quarter'ın örtüşmesini engelle
     const firstEnd = Math.min(quarter, Math.floor(n / 2));
     const lastStart = Math.max(n - quarter, firstEnd);
     const firstReps = reps.slice(0, firstEnd);
@@ -2090,7 +2070,6 @@ function calcPushup(lm) {
     }
     if (b.bothDown && (Date.now() - (b.pushStartTime || 0) > 8000)) { b.bothDown = false; b.pushCooldown = 10; }
 }
-// 🐛 BUG FIX 4: Lunge simetri özeti + knee açıları null kontrolü
 function calcLunge(lm) {
     const b = STATE.brain.lunge;
     const kneeR = getAngleDeg(lm[23], lm[25], lm[27]);
@@ -2126,7 +2105,6 @@ function computeLungeSummary(b) {
         symmetryPct: +(100 - asymmetry).toFixed(1),
     };
 }
-// 🐛 BUG FIX 4: Deadlift özeti + null kontrolü
 function calcDeadlift(lm) {
     const b = STATE.brain.deadlift;
     const orient = getActiveOrientation();
@@ -2310,7 +2288,6 @@ function calcFree(lm) {
     updateTelemetry('Serbest', `${rem.toFixed(1)}s`, `Y: %${hipY}`);
     if (elapsed >= b.freeDur) { STATE.metrics.push(`Süre: ${b.freeDur}s`); finishMode(1500); }
 }
-// 🐛 BUG FIX 2: getAngleDeg artık null döner (görünürlük < 0.5 ise)
 function getAngleDeg(a, b, c) {
     if (!a || !b || !c) return null;
     if ((a.visibility ?? 1) < 0.5 || (b.visibility ?? 1) < 0.5 || (c.visibility ?? 1) < 0.5) return null;
@@ -2333,7 +2310,6 @@ function updateHUD(status) {
 }
 const ORIENT_RECOMMENDATION = { jump: 'side', dropjump: 'side', squat: 'side', pushup: 'side', lunge: 'front', deadlift: 'side', plank: 'side', power: 'side', free: 'auto', amrap: 'side' };
 
-// 🔥 FIX 3: Kameraya otomatik kaydırma yardımcısı
 function scrollToCameraView() {
     const vision = document.getElementById('visionEngine');
     if (!vision) return;
@@ -2349,7 +2325,6 @@ function startMode(mode) {
     if (!STATE.cameraReady) { STATE.log('Kamera hazır değil.', 'warning'); openPermOverlay(); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { STATE.log('⚠️ Önce mevcut testi bitirin.', 'warning'); return; }
 
-    // 🔥 FIX 3: Kameraya otomatik kaydır
     scrollToCameraView();
 
     if (STATE.currentAthlete) {
@@ -2507,11 +2482,9 @@ function finishCleanup() {
     document.getElementById('countdownOverlay').textContent = '';
     document.getElementById('amrapOverlay').classList.remove('visible');
 
-    // 🔥 FIX 2: HUD'u geri getir
     const hud = document.querySelector('.hud-top-left');
     if (hud) hud.style.display = 'flex';
 
-    // 🔥 FIX 3: Postprocess badge konumunu sıfırla
     const ppBadge = document.getElementById('postProcessBadge');
     if (ppBadge) ppBadge.style.bottom = '24px';
 
@@ -2589,7 +2562,7 @@ async function processNextInQueue() {
     updateQueueBadge();
     showPostProcessBadge();
     if (STATE.pauseQueueEnabled) document.getElementById('pauseHudBadge').style.display = 'flex';
-       try { await runPostProcessJob(job.blob, job.recordId, job.mode, job.trackConfig); }
+    try { await runPostProcessJob(job.blob, job.recordId, job.mode, job.trackConfig); }
     catch (e) { STATE.log('Kuyruk işi hatası: ' + e.message, 'error'); }
     finally {
         STATE.postProcessing = false;
@@ -2907,7 +2880,7 @@ async function runTrackPostProcess(videoBlob, recordId, trackConfig) {
                 }
             }
         }
-                if (refinedSplits.length === 0) {
+        if (refinedSplits.length === 0) {
             STATE.log('⚠️ Sprint refined: checkpoint geçişi bulunamadı, canlı sonuç korunuyor', 'warning');
             showToast('⚠️ Refined başarısız — canlı sonuç geçerli', 'warning', 5000);
             return;
@@ -2962,7 +2935,7 @@ async function updateRecordWithRefinedData(recordId, refined) {
             if (record) {
                 record.refined = refined;
                 record.refinedDate = Date.now();
-                              if (record.type === 'JUMP') record.res = formatJumpMetrics(refined).join(' · ');
+                if (record.type === 'JUMP') record.res = formatJumpMetrics(refined).join(' · ');
                 else if (record.type === 'DROPJUMP') record.res = formatDropJumpMetrics(refined).join(' · ');
                 else if (record.type && record.type.startsWith('TRACK_')) record.res = formatTrackMetrics(refined).join(' · ');
                 store.put(record);
@@ -2975,7 +2948,7 @@ async function updateRecordWithRefinedData(recordId, refined) {
             });
             saveAthletes();
         }
-                if (STATE.brain.track && STATE.brain.track.result.recordId === recordId) {
+        if (STATE.brain.track && STATE.brain.track.result.recordId === recordId) {
             STATE.brain.track.result.refined = refined;
             if (document.getElementById('trackResultContainer') && STATE.brain.track.result.draft) {
                 renderTrackResultCard(STATE.brain.track.result.draft);
@@ -3690,20 +3663,17 @@ async function generateAthletePDF() {
         const typesInAll = new Set();
         a.sessions.forEach(s => s.tests.forEach(t => typesInAll.add(t.type)));
         typesInAll.forEach(type => { doc.addPage(); drawExercisePage(doc, a, type, pageW, pageH, margin); });
-
-        // HipMap Gallery Sayfası
         if (typesInAll.has('JUMP') || typesInAll.has('DROPJUMP')) {
             doc.addPage();
             drawHipMapGalleryPage(doc, a, pageW, pageH, margin);
         }
-
         doc.addPage(); await drawProgressCharts(doc, a, pageW, pageH, margin);
         doc.addPage(); drawCoachingPage(doc, a, pageW, margin);
         const pc = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pc; i++) {
             doc.setPage(i);
             doc.setFontSize(8); doc.setTextColor(150);
-            doc.text(`Azythos Motion v9.9 · ${a.name}`, margin, pageH - 8);
+            doc.text(`Azythos Motion v9.9 Hibrit · ${a.name}`, margin, pageH - 8);
             doc.text(`Sayfa ${i} / ${pc}`, pageW - margin, pageH - 8, { align: 'right' });
         }
         const safeName = a.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
@@ -3920,7 +3890,6 @@ function drawExercisePage(doc, a, type, w, h, margin) {
         return;
     }
 
-    // Standart egzersizler
     const rows = tests.map(({ date, test }) => {
         if (test.refined) return [
             new Date(date).toLocaleDateString('tr-TR'), `${test.refined.jumpHeightCm}cm`,
@@ -4328,18 +4297,19 @@ async function generateTeamPDF() {
         showToast('❌ Takım PDF oluşturulamadı', 'error', 6000);
     }
 }
+
 // =============================================================
-// 🏃 TRACK MODULE — Sprint + 5-10-5 (v9.9)  — FIXED v2
+// 🏃 TRACK MODULE — 1. dosyanın tüm gelişmiş özellikleri
+//                 + 2. dosyanın `}` FIX'i
 // =============================================================
 
-// 🔥 FIX 2: Eşikler gevşetildi — jitter ve uzak sporcular için daha toleranslı
 const TRACK_DEFAULTS = {
     stationaryThresholdMs: 0.8,
     stationaryFrames: 6,
     sizeStabilityThreshold: 0.25,
     sizePlausibilityMin: 0.12,
     sizePlausibilityMax: 0.85,
-    rearwardReleaseM: 6.0,  // 🔥 1.5 → 6.0
+    rearwardReleaseM: 6.0,
     lostFramesTolerance: 15, recordingLostFault: 30,
     maxFramesBuffer: 60 * 120,
 };
@@ -4348,12 +4318,13 @@ function ensureTrackState() {
     if (!STATE.brain.track) {
         STATE.brain.track = {
             template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
-            triggerMode: 'standing', firstMoveDir: 1,
+            triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,
             armFeedback: { visual: true, audio: true }, calibration: null,
             runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
                 nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
                 armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
-                prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '' },
+                prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '',
+                hasBeenArmed: false },
             result: { draft: null, refined: null, certified: null },
             frames: [], events: [],
         };
@@ -4392,19 +4363,18 @@ function setSprintDirection(dir) {
 function readTrackConfig() {
     const track = ensureTrackState();
     if (track.template === 'sprint') {
-    const total = parseFloat(document.getElementById('trackTotalDistance')?.value) || 30;
-    const count = Math.max(2, Math.min(6, parseInt(document.getElementById('trackCheckpointCount')?.value) || 2));
-    const sdir = track.sprintDirection || 1;  // 🔥 YENİ
-    const distances = [0];
-    for (let i = 1; i < count - 1; i++) distances.push(Math.round((total / (count - 1)) * i));
-    distances.push(total);
-    track.checkpoints = distances.map((d, i) => ({
-        order: i, cumulativeD: d, approachDir: sdir,  // 🔥 sdir kullan
-        label: i === 0 ? 'start' : i === count - 1 ? 'finish' : 'split',
-        position: null, capturedAt: null, capturedVx: null, confidence: null,
-    }));
-}
- else {
+        const total = parseFloat(document.getElementById('trackTotalDistance')?.value) || 30;
+        const count = Math.max(2, Math.min(6, parseInt(document.getElementById('trackCheckpointCount')?.value) || 2));
+        const sdir = track.sprintDirection || 1;
+        const distances = [0];
+        for (let i = 1; i < count - 1; i++) distances.push(Math.round((total / (count - 1)) * i));
+        distances.push(total);
+        track.checkpoints = distances.map((d, i) => ({
+            order: i, cumulativeD: d, approachDir: sdir,
+            label: i === 0 ? 'start' : i === count - 1 ? 'finish' : 'split',
+            position: null, capturedAt: null, capturedVx: null, confidence: null,
+        }));
+    } else {
         const fd = track.firstMoveDir, yd = 0.9144;
         const d1 = 5 * yd, d2 = d1 + 10 * yd, d3 = d2 + 5 * yd;
         track.checkpoints = [
@@ -4422,11 +4392,10 @@ function startTrackTest() {
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { showToast('⚠️ Önce mevcut testi bitirin', 'warning'); return; }
     if (STATE.isRecording) { try { stopTrackRecording(null); } catch (_) {} }
 
-    // 🔥 FIX 3: Kameraya otomatik kaydır
     scrollToCameraView();
 
     const track = readTrackConfig();
-        track.runtime.phase = 'PLACEMENT';
+    track.runtime.phase = 'PLACEMENT';
     track.runtime.placementIdx = 0;
     track.runtime.hipXHistory = [];
     track.runtime.seekHint = '';
@@ -4468,9 +4437,9 @@ function updateTrackPlacementHint() {
     if (!hint) return;
     if (idx < track.checkpoints.length) {
         const cp = track.checkpoints[idx];
-const dirLabel = (track.sprintDirection === -1) ? ' (sağdan sola)' : ' (soldan sağa)';
-if (cp.label === 'start') hint.textContent = `🟢 Başlangıç çizgisini yerleştir${dirLabel}`;
-else if (cp.label === 'finish') hint.textContent = `🔴 Bitiş çizgisini yerleştir${dirLabel}`;
+        const dirLabel = (track.sprintDirection === -1) ? ' (sağdan sola)' : ' (soldan sağa)';
+        if (cp.label === 'start') hint.textContent = `🟢 Başlangıç çizgisini yerleştir${dirLabel}`;
+        else if (cp.label === 'finish') hint.textContent = `🔴 Bitiş çizgisini yerleştir${dirLabel}`;
         else if (cp.label === 'turn') hint.textContent = `🟡 ${idx}. Dönüş konisini yerleştir`;
         else hint.textContent = `🟡 ${idx}. Çizgi (${cp.cumulativeD.toFixed(1)}m)`;
         sub.textContent = 'Canvas üzerinde dokun';
@@ -4537,9 +4506,9 @@ function computeTrackCalibration(track) {
     const warnings = [];
     if (range > 0 && maxResidual / range > 0.08) warnings.push('koni-sapma');
     const autoDirection = pts[n - 1].x > pts[0].x ? 1 : -1;
-// 🔥 Kullanıcı yön seçimi varsa onu kullan
-const direction = track.sprintDirection || autoDirection;
-return { pixelPerMeter: Math.abs(a) || 1, slope: a, intercept: b, direction, residual: range > 0 ? maxResidual / range : 0, method: 'linear', coneCount: n, warnings };
+    const direction = track.sprintDirection || autoDirection;
+    return { pixelPerMeter: Math.abs(a) || 1, slope: a, intercept: b, direction, residual: range > 0 ? maxResidual / range : 0, method: 'linear', coneCount: n, warnings };
+}  // 🔥🔥🔥 EKSİK PARANTEZ BURADA — 2. DOSYADAN FIX
 
 function computeCoreBox(lm) {
     const indices = [0, 11, 12, 23, 24];
@@ -4563,7 +4532,7 @@ function runTrackBiometrics(lm) {
     const track = ensureTrackState();
     const phase = track.runtime.phase;
     if (phase === 'STANDBY' || phase === 'PLACEMENT') return;
-     const now = performance.now();
+    const now = performance.now();
     const prevT = track.runtime.prevT || now;
     const dt = prevT !== now ? (now - prevT) / 1000 : 0;
     const coreBox = computeCoreBox(lm);
@@ -4581,7 +4550,6 @@ function runTrackBiometrics(lm) {
     const hipX = hip.x * canvasW;
     const ppm = track.calibration?.pixelPerMeter || 1;
 
-    // 🔥 FIX 2: Pencere tabanlı hız (jitter yumuşatma) — eski tek-kare hızı yerine
     if (!track.runtime.hipXHistory) track.runtime.hipXHistory = [];
     track.runtime.hipXHistory.push({ x: hipX, t: now });
     if (track.runtime.hipXHistory.length > 15) track.runtime.hipXHistory.shift();
@@ -4613,23 +4581,21 @@ function enterTrackPhase(newPhase, reasonOrTime) {
     track.runtime.phase = newPhase;
     track.runtime.phaseEnteredAt = performance.now();
     if (newPhase === 'SEEKING') {
-    track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = [];
-    track.runtime.hipXHistory = [];
-    track.runtime.seekHint = '';
-    track.runtime.hasBeenArmed = false;  // 🔥 YENİ — tekrar hazır olabilmesi için
-    hideArmedIndicator();
-    // ...
-}
-        if (newPhase === 'ARMED') {
-    track.runtime.armedRearmostX = track.runtime.lastBoxFrontX;
-    showArmedIndicator();
-    // 🔥 Ses sadece 1 kez — tekrar tekrar çalmasın
-    if (track.armFeedback.audio && !track.runtime.hasBeenArmed) {
-        speak('Hazır');
-        track.runtime.hasBeenArmed = true;
+        track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = [];
+        track.runtime.hipXHistory = [];
+        track.runtime.seekHint = '';
+        track.runtime.hasBeenArmed = false;
+        hideArmedIndicator();
     }
-    if (!STATE.isRecording) startTrackRecording();
-}
+    if (newPhase === 'ARMED') {
+        track.runtime.armedRearmostX = track.runtime.lastBoxFrontX;
+        showArmedIndicator();
+        if (track.armFeedback.audio && !track.runtime.hasBeenArmed) {
+            speak('Hazır');
+            track.runtime.hasBeenArmed = true;
+        }
+        if (!STATE.isRecording) startTrackRecording();
+    }
     if (newPhase === 'RECORDING') {
         hideArmedIndicator();
         const tCross = typeof reasonOrTime === 'number' ? reasonOrTime : performance.now();
@@ -4644,7 +4610,7 @@ function enterTrackPhase(newPhase, reasonOrTime) {
         STATE.log('🏁 Test tamamlandı', 'success');
         finalizeTrackRun();
     }
-        if (newPhase === 'FAULT') {
+    if (newPhase === 'FAULT') {
         hideArmedIndicator(); showTrackTimerDisplay(false);
         stopTrackRecording(null);
         showToast('⚠️ Takip kaybı — test iptal', 'error', 5000);
@@ -4652,7 +4618,6 @@ function enterTrackPhase(newPhase, reasonOrTime) {
     }
 }
 
-// 🔥 FIX 2: handleSeekingTrack yeniden yazıldı — neden beklemediğini gösterir
 function handleSeekingTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, prevT) {
     const track = STATE.brain.track;
     const dir = track.calibration?.direction || 1;
@@ -4708,7 +4673,6 @@ function handleArmedTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, prevT) 
     const startX = track.checkpoints[0].position;
     const boxFrontX = dir > 0 ? coreBox.maxX * canvasW : coreBox.minX * canvasW;
 
-    // 🔥 Rearward kontrolü SADECE 5-10-5'te — sprint'te sporcu zaten ileride olabilir
     if (track.template === '5-10-5') {
         const behindPx = (startX - boxFrontX) * dir;
         const behindM = behindPx / (track.calibration?.pixelPerMeter || 1);
@@ -4731,7 +4695,6 @@ function handleRecordingTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, pre
         track.frames.push({ t: now, boxFrontX, boxCenterX: coreBox.centerX * canvasW, boxW: coreBox.width * canvasW, boxH: coreBox.height * canvasH, hipX: hip.x * canvasW, hipY: hip.y * canvasH, vx: hipVxMps, conf: Math.round((coreBox.confidence || 0) * 100) });
     }
 
-    // 🔥 Çoklu checkpoint yakalama — bir frame'de birden fazla çizgi geçilebilir
     let iterations = 0;
     while (track.runtime.nextCheckpointIdx < track.checkpoints.length && iterations < 10) {
         iterations++;
@@ -4775,7 +4738,6 @@ function captureTrackCheckpoint(idx, tCross) {
     cp.confidence = 90;
     track.events.push({ type: 'cross', idx, label: cp.label, t: tCross, d: cp.cumulativeD, vx: track.runtime.lastBoxFrontVx });
 
-    // 🔥 Her çizgi geçişinde canlı toast + ses (başlangıç hariç)
     if (idx > 0) {
         const startT = track.checkpoints[0].capturedAt || tCross;
         const elapsed = (tCross - startT) / 1000;
@@ -4843,7 +4805,6 @@ function updateTrackTelemetry() {
     });
     html += '</div>';
 
-    // 🔥 CANLI SPLIT METRİKLERİ — her çizgi geçişinde metre + süre + hız
     const capturedCps = track.checkpoints.filter(c => c.capturedAt);
     if (capturedCps.length > 1) {
         const startT = capturedCps[0].capturedAt;
@@ -5181,8 +5142,9 @@ function stopTrackRecording(callback) {
         }
     }, 33);
 })();
+
 // =============================================================
-// 📤 ATHLETE JSON SHARE — Team + Individual + Import (v9.9)
+// 📤 ATHLETE JSON SHARE
 // =============================================================
 
 const AZYTHOS_SHARE_VERSION = '1.0';
@@ -5204,7 +5166,7 @@ function buildAthleteSharePackage(mode) {
             format: 'azythos-share',
             mode: isTeam ? 'team_submission' : 'individual_export',
             generated_at: new Date().toISOString(),
-            app: 'Azythos Motion v9.9 ULTIMATE',
+            app: 'Azythos Motion v9.9 HİBRİT',
             generator: 'Azythos Motion',
             description: isTeam
                 ? 'Sporcu → Koç takım kaydı. Bu dosya koç tarafından Azythos\'a içe aktarılabilir.'
@@ -5547,7 +5509,7 @@ async function importAthleteJSON(file) {
         showToast('❌ İthalat hatası: ' + e.message, 'error', 6000);
     }
 }
-// =============================================================
+
 function unifiedImportFileChange(e) {
     const f = e.target.files && e.target.files[0];
     if (f) unifiedImport(f);
@@ -5568,19 +5530,16 @@ async function unifiedImport(file) {
         }
         const parsed = JSON.parse(text);
 
-        // Format 1: Eski IndexedDB backup (array of records)
         if (Array.isArray(parsed)) {
             await importRecordsBackup(parsed);
             return;
         }
 
-        // Format 2: Yeni sporcu share paketi
         if (parsed.azythos_share && parsed.athlete) {
             await importAthleteJSON(file);
             return;
         }
 
-        // Format 3: Tek kayıt objesi (kenar durum)
         if (parsed.id && parsed.type) {
             await importRecordsBackup([parsed]);
             return;
@@ -5627,6 +5586,7 @@ async function importRecordsBackup(records) {
         showToast('❌ İthalat hatası: ' + e.message, 'error', 5000);
     }
 }
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
@@ -5636,7 +5596,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.device-card').forEach(c => { if (c.dataset.device === suggested) c.classList.add('suggested'); });
         applyDeviceLayout(suggested);
 
-        // 🔥 FIX 1: Kaydedilmiş kamera yönünü geri yükle
         try {
             const fm = localStorage.getItem('azythos_facing_mode');
             if (fm === 'environment') {
@@ -5656,7 +5615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ac !== null) { STATE.autoCleanupEnabled = ac === '1'; document.getElementById('autoCleanupToggle').checked = STATE.autoCleanupEnabled; }
         } catch (_) {}
 
-        STATE.log('🚀 Azythos Motion v9.9 ULTIMATE hazır ', 'success');
+        STATE.log('🚀 Azythos Motion v9.9 HİBRİT hazır', 'success');
         document.getElementById('telMode').textContent = '—';
         document.getElementById('telProgress').textContent = 'Beklemede';
         updateGlobalDisplay(); updateCalibrationBadge();
@@ -5676,7 +5635,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             catch (e) { showToast('Model hatası', 'error'); }
         });
 
-        // 🐛 BUG FIX 5: Klavye kısayolları input/textarea/select'te tetiklenmesin
         document.addEventListener('keydown', (e) => {
             const tag = (e.target && e.target.tagName) || '';
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return;
@@ -5700,7 +5658,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 ULTIMATE · Melez sürüm hazır');
+        console.log('◈ Azythos Motion v9.9 HİBRİT · 1+2 birleşik sürüm hazır');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
