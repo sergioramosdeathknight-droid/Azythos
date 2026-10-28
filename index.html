@@ -308,6 +308,75 @@
         body.dev-phone .track-result-big{font-size:32px}
         .track-trajectory-wrap{margin-top:10px;padding:6px;background:rgba(0,0,0,.4);border-radius:8px;border:1px solid rgba(34,211,238,.2)}
         .track-trajectory-wrap canvas{width:100%;height:140px;display:block;border-radius:6px}
+
+        /* ================= · TELEFON (SPRINT) DÜZELTMESİ =================
+           Amaç: "Koşu Alanı" kartındaki ▶ Çizgileri Yerleştir butonu telefonda
+           yön butonları + mesafe/çizgi inputları yüzünden görünmüyordu.
+           Çözüm: 1) kaydırma yönü normalleşir  2) satırlar sıkışır
+                  3) BAŞLAT butonu ekranın altına yapışır (sticky)
+           ====================================================================== */
+        @media (max-width: 900px) {
+
+          /* 1) column-reverse kaydırma tuhaflığını kaldır */
+          body.dev-phone .app-main{
+            flex-direction: column;
+            height: calc(100vh - 56px);
+            height: calc(100dvh - 56px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+          }
+          body.dev-phone .vision-engine{ order: -1; }
+          body.dev-phone .sidebar{ order: 0; }
+
+          /* 2) Track kartı taşmasın (sticky için overflow:visible şart) */
+          body.dev-phone .track-card{
+            overflow: visible !important;
+            padding-bottom: 14px;
+          }
+          body.dev-phone .track-card:active{ transform: none; }
+
+          /* 3) Satırları sıkıştır */
+          body.dev-phone .track-card .control-row{
+            margin-bottom: 6px !important;
+            gap: 8px;
+            align-items: center;
+          }
+          body.dev-phone .track-card .control-row > label{
+            font-size: 11px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+          }
+          body.dev-phone .track-card .control-row > div{
+            flex: 1 1 auto;
+            display: flex !important;
+            gap: 6px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+          }
+          body.dev-phone .track-card .control-row .btn-sm{
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 8px 6px;
+            font-size: 11px;
+            white-space: nowrap;
+          }
+          body.dev-phone .track-card .control-row input[type="number"]{
+            width: 72px;
+            padding: 5px 2px;
+            font-size: 14px;
+          }
+
+          /* 4) ▶ BAŞLAT BUTONU sticky */
+          body.dev-phone .track-card > .btn{
+            position: sticky;
+            bottom: 10px;
+            z-index: 6;
+            margin-top: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 22px rgba(16,185,129,.25);
+          }
+        }
     </style>
 </head>
 <body>
@@ -698,9 +767,8 @@
 
 <script>
 // =============================================================
-// HİBRİT v9.9 · 1. dosya (tüm gelişmiş Track özellikleri)
-//             + 2. dosyanın computeTrackCalibration `}` fix'i
-//             + Ekstra tüm bug fix'ler korunmuştur
+// HİBRİT v9.9 · 1. dosya + 2. dosyanın computeTrackCalibration `}` fix'i
+//             + Telefon (Sprint) düzeltmesi
 // =============================================================
 
 window.addEventListener('error', function (e) {
@@ -745,13 +813,13 @@ const STATE = {
         jump: {}, dropjump: {}, squat: {}, pushup: {}, lunge: {}, deadlift: {}, plank: {}, power: {}, free: {}, amrap: {},
         track: {
             template: 'sprint', unit: 'm', checkpoints: [], timerStartIdx: 0,
-            triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,  // 🔥 YENİ
+            triggerMode: 'standing', firstMoveDir: 1, sprintDirection: 1,
             armFeedback: { visual: true, audio: true }, calibration: null,
             runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
                 nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
                 armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
                 prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '',
-                hasBeenArmed: false },  // 🔥 YENİ: hasBeenArmed, hipXHistory, seekHint
+                hasBeenArmed: false },
             result: { draft: null, refined: null, certified: null },
             frames: [], events: [],
         },
@@ -4299,8 +4367,7 @@ async function generateTeamPDF() {
 }
 
 // =============================================================
-// 🏃 TRACK MODULE — 1. dosyanın tüm gelişmiş özellikleri
-//                 + 2. dosyanın `}` FIX'i
+// 🏃 TRACK MODULE
 // =============================================================
 
 const TRACK_DEFAULTS = {
@@ -4508,7 +4575,7 @@ function computeTrackCalibration(track) {
     const autoDirection = pts[n - 1].x > pts[0].x ? 1 : -1;
     const direction = track.sprintDirection || autoDirection;
     return { pixelPerMeter: Math.abs(a) || 1, slope: a, intercept: b, direction, residual: range > 0 ? maxResidual / range : 0, method: 'linear', coneCount: n, warnings };
-}  // 🔥🔥🔥 EKSİK PARANTEZ BURADA — 2. DOSYADAN FIX
+}
 
 function computeCoreBox(lm) {
     const indices = [0, 11, 12, 23, 24];
@@ -5658,7 +5725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (STATE.chart) STATE.chart.resize(); }, 200); });
 
         ensureTurkishFont().catch(() => {});
-        console.log('◈ Azythos Motion v9.9 HİBRİT · 1+2 birleşik sürüm hazır');
+        console.log('◈ Azythos Motion hazır');
     } catch (err) {
         console.error('Init hatası:', err);
         try { showToast('Başlatma hatası: ' + (err.message || err), 'error', 6000); } catch (_) {}
