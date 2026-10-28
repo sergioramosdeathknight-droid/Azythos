@@ -1328,6 +1328,8 @@ async function switchCamera() {
         document.getElementById('mirrorMode').checked = isFront;
         STATE.mirror = isFront;
         updateGlobalDisplay(); updateCamLabel();
+        // 🔥 FIX 1: Kamera yönünü kalıcı yap
+        try { localStorage.setItem('azythos_facing_mode', STATE.facingMode); } catch (_) {}
         showToast(isFront ? '📱 Ön kamera' : '📷 Arka kamera', 'success', 2000);
     } catch (e) {
         STATE.facingMode = prev;
@@ -1450,6 +1452,9 @@ function runBiometrics(lm) {
 function startAMRAP() {
     if (!STATE.cameraReady) { showToast('Kamera hazır değil', 'warning'); openPermOverlay(); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { showToast('⚠️ Önce mevcut testi bitirin', 'warning'); return; }
+
+    // 🔥 FIX 3: Kameraya otomatik kaydır
+    scrollToCameraView();
 
     const ex = document.getElementById('amrapExercise')?.value || 'pushup';
     const useLimit = document.getElementById('amrapUseLimit')?.checked || false;
@@ -2319,10 +2324,26 @@ function updateHUD(status) {
     else { dot.className = 'dot'; label.textContent = 'Hazır'; }
 }
 const ORIENT_RECOMMENDATION = { jump: 'side', dropjump: 'side', squat: 'side', pushup: 'side', lunge: 'front', deadlift: 'side', plank: 'side', power: 'side', free: 'auto', amrap: 'side' };
+
+// 🔥 FIX 3: Kameraya otomatik kaydırma yardımcısı
+function scrollToCameraView() {
+    const vision = document.getElementById('visionEngine');
+    if (!vision) return;
+    try {
+        vision.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    } catch (_) {
+        try { vision.scrollIntoView(true); } catch (_) {}
+    }
+}
+
 function startMode(mode) {
     if (mode === 'track') { startTrackTest(); return; }
     if (!STATE.cameraReady) { STATE.log('Kamera hazır değil.', 'warning'); openPermOverlay(); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { STATE.log('⚠️ Önce mevcut testi bitirin.', 'warning'); return; }
+
+    // 🔥 FIX 3: Kameraya otomatik kaydır
+    scrollToCameraView();
+
     if (STATE.currentAthlete) {
         const profile = STATE.athletes[STATE.currentAthlete]?.profile;
         if (profile) {
@@ -4300,12 +4321,16 @@ async function generateTeamPDF() {
     }
 }
 // =============================================================
-// 🏃 TRACK MODULE — Sprint + 5-10-5 (v9.9)
+// 🏃 TRACK MODULE — Sprint + 5-10-5 (v9.9)  — FIXED v2
 // =============================================================
 
+// 🔥 FIX 2: Eşikler gevşetildi — jitter ve uzak sporcular için daha toleranslı
 const TRACK_DEFAULTS = {
-    stationaryThresholdMs: 0.4, stationaryFrames: 10,
-    sizeStabilityThreshold: 0.10, sizePlausibilityMin: 0.25, sizePlausibilityMax: 0.75,
+    stationaryThresholdMs: 0.8,
+    stationaryFrames: 6,
+    sizeStabilityThreshold: 0.25,
+    sizePlausibilityMin: 0.12,
+    sizePlausibilityMax: 0.85,
     rearwardReleaseM: 1.5, lostFramesTolerance: 15, recordingLostFault: 30,
     maxFramesBuffer: 60 * 120,
 };
@@ -4319,11 +4344,12 @@ function ensureTrackState() {
             runtime: { phase: 'STANDBY', phaseEnteredAt: 0, stationaryFrames: 0, lostFrames: 0,
                 nextCheckpointIdx: 0, lastHipX: 0, lastHipVx: 0, lastBoxFrontX: 0, lastBoxFrontVx: 0,
                 armedRearmostX: 0, crossingCandidate: null, stationaryHistory: [], prevBoxFrontX: null,
-                prevT: 0, placementIdx: 0, recordingStart: 0 },
+                prevT: 0, placementIdx: 0, recordingStart: 0, hipXHistory: [], seekHint: '' },
             result: { draft: null, refined: null, certified: null },
             frames: [], events: [],
         };
     }
+    if (!STATE.brain.track.runtime.hipXHistory) STATE.brain.track.runtime.hipXHistory = [];
     return STATE.brain.track;
 }
 
@@ -4377,9 +4403,15 @@ function startTrackTest() {
     if (!STATE.cameraReady) { STATE.log('Kamera hazır değil.', 'warning'); return; }
     if (STATE.mode !== 'IDLE' && STATE.mode !== 'FINISH') { showToast('⚠️ Önce mevcut testi bitirin', 'warning'); return; }
     if (STATE.isRecording) { try { stopTrackRecording(null); } catch (_) {} }
+
+    // 🔥 FIX 3: Kameraya otomatik kaydır
+    scrollToCameraView();
+
     const track = readTrackConfig();
         track.runtime.phase = 'PLACEMENT';
     track.runtime.placementIdx = 0;
+    track.runtime.hipXHistory = [];
+    track.runtime.seekHint = '';
     track._finalized = false;
     track.result = { draft: null, refined: null, certified: null, recordId: null };
     track.frames = []; track.events = [];
@@ -4461,6 +4493,8 @@ function finalizeTrackPlacement() {
     rt.stationaryFrames = 0; rt.lostFrames = 0; rt.nextCheckpointIdx = 0;
     rt.crossingCandidate = null; rt.prevBoxFrontX = null; rt.prevT = 0;
     rt.recordingStart = 0;
+    rt.hipXHistory = [];
+    rt.seekHint = '⬅ Sporcu başlangıç çizgisinin gerisinde olmalı';
     track.checkpoints.forEach(c => { c.capturedAt = null; c.capturedVx = null; c.confidence = null; });
     STATE.mode = 'TRACK'; STATE.currentMode = 'track';
     document.getElementById('telemetryPanel')?.classList.add('visible');
@@ -4526,16 +4560,28 @@ function runTrackBiometrics(lm) {
     const canvasW = canvas.width;
     const hipX = hip.x * canvasW;
     const ppm = track.calibration?.pixelPerMeter || 1;
+
+    // 🔥 FIX 2: Pencere tabanlı hız (jitter yumuşatma) — eski tek-kare hızı yerine
+    if (!track.runtime.hipXHistory) track.runtime.hipXHistory = [];
+    track.runtime.hipXHistory.push({ x: hipX, t: now });
+    if (track.runtime.hipXHistory.length > 15) track.runtime.hipXHistory.shift();
     let hipVxMps = 0;
-    if (dt > 0 && track.runtime.lastHipX) hipVxMps = ((hipX - track.runtime.lastHipX) / ppm) / dt;
+    const hist = track.runtime.hipXHistory;
+    if (hist.length >= 6) {
+        const oldest = hist[0], newest = hist[hist.length - 1];
+        const dtHist = (newest.t - oldest.t) / 1000;
+        if (dtHist > 0.12) hipVxMps = ((newest.x - oldest.x) / ppm) / dtHist;
+    }
     track.runtime.lastHipX = hipX;
     track.runtime.lastHipVx = hipVxMps;
+
     const dir = track.calibration?.direction || 1;
     const boxFrontX = dir > 0 ? coreBox.maxX * canvasW : coreBox.minX * canvasW;
     track.runtime.prevBoxFrontX = track.runtime.lastBoxFrontX || boxFrontX;
     track.runtime.lastBoxFrontX = boxFrontX;
     track.runtime.lastBoxFrontVx = hipVxMps;
-       if (phase === 'SEEKING') handleSeekingTrack(coreBox, hip, hipVxMps, canvasW, canvas.height, now, prevT);
+
+    if (phase === 'SEEKING') handleSeekingTrack(coreBox, hip, hipVxMps, canvasW, canvas.height, now, prevT);
     else if (phase === 'ARMED') handleArmedTrack(coreBox, hip, hipVxMps, canvasW, canvas.height, now, prevT);
     else if (phase === 'RECORDING') handleRecordingTrack(coreBox, hip, hipVxMps, canvasW, canvas.height, now, prevT);
     track.runtime.prevT = now;
@@ -4548,6 +4594,8 @@ function enterTrackPhase(newPhase, reasonOrTime) {
     track.runtime.phaseEnteredAt = performance.now();
     if (newPhase === 'SEEKING') {
         track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = [];
+        track.runtime.hipXHistory = []; // 🔥 FIX 2
+        track.runtime.seekHint = '';
         hideArmedIndicator();
         if (reasonOrTime === 'kayıp') showToast('⚠️ Sporcu kayboldu', 'warning', 3000);
         if (reasonOrTime === 'yanlış yön') showToast('⚠️ Yanlış yöne koştu', 'warning', 3000);
@@ -4580,25 +4628,53 @@ function enterTrackPhase(newPhase, reasonOrTime) {
         STATE.mode = 'IDLE'; STATE.currentMode = '';
     }
 }
+
+// 🔥 FIX 2: handleSeekingTrack yeniden yazıldı — neden beklemediğini gösterir
 function handleSeekingTrack(coreBox, hip, hipVxMps, canvasW, canvasH, now, prevT) {
     const track = STATE.brain.track;
     const dir = track.calibration?.direction || 1;
     const startX = track.checkpoints[0].position;
     const boxFrontX = dir > 0 ? coreBox.maxX * canvasW : coreBox.minX * canvasW;
-    const behind = dir > 0 ? boxFrontX < startX - 5 : boxFrontX > startX + 5;
-    if (!behind) { track.runtime.stationaryFrames = 0; return; }
+    const behindMargin = 2;
+    const behind = dir > 0 ? boxFrontX < startX - behindMargin : boxFrontX > startX + behindMargin;
+
+    if (!behind) {
+        track.runtime.stationaryFrames = 0;
+        track.runtime.stationaryHistory = [];
+        track.runtime.seekHint = '⬅ Sporcu başlangıç çizgisinin GERİSİNDE olmalı';
+        return;
+    }
+
+    const hRatio = coreBox.height;
+    if (hRatio < TRACK_DEFAULTS.sizePlausibilityMin || hRatio > TRACK_DEFAULTS.sizePlausibilityMax) {
+        track.runtime.stationaryFrames = 0;
+        track.runtime.seekHint = `📏 Sporcu boyutu uygun değil (%${Math.round(hRatio*100)}) — kameraya yaklaş/uzaklaş`;
+        return;
+    }
+
+    if (Math.abs(hipVxMps) > TRACK_DEFAULTS.stationaryThresholdMs) {
+        track.runtime.stationaryFrames = 0;
+        track.runtime.stationaryHistory = [];
+        track.runtime.seekHint = `🏃 Hareket algılandı (${hipVxMps.toFixed(2)} m/s) — hareketsiz dur`;
+        return;
+    }
+
     const boxW = coreBox.width * canvasW;
-    const boxH = coreBox.height * canvasH;
-    const hRatio = boxH / canvasH;
-    if (hRatio < TRACK_DEFAULTS.sizePlausibilityMin || hRatio > TRACK_DEFAULTS.sizePlausibilityMax) return;
-    if (Math.abs(hipVxMps) > TRACK_DEFAULTS.stationaryThresholdMs) { track.runtime.stationaryFrames = 0; track.runtime.stationaryHistory = []; return; }
     track.runtime.stationaryHistory.push({ x: hip.x, w: boxW, t: now });
-    if (track.runtime.stationaryHistory.length > TRACK_DEFAULTS.stationaryFrames) track.runtime.stationaryHistory.shift();
+    if (track.runtime.stationaryHistory.length > TRACK_DEFAULTS.stationaryFrames) {
+        track.runtime.stationaryHistory.shift();
+    }
     if (track.runtime.stationaryHistory.length >= 5) {
         const widths = track.runtime.stationaryHistory.map(h => h.w);
         const minW = Math.min(...widths), maxW = Math.max(...widths), avgW = (minW + maxW) / 2;
-        if (avgW > 0 && (maxW - minW) / avgW > TRACK_DEFAULTS.sizeStabilityThreshold) { track.runtime.stationaryFrames = 0; return; }
+        if (avgW > 0 && (maxW - minW) / avgW > TRACK_DEFAULTS.sizeStabilityThreshold) {
+            track.runtime.stationaryFrames = 0;
+            track.runtime.seekHint = '📍 Pozisyon sabit değil — tamamen hareketsiz dur';
+            return;
+        }
     }
+
+    track.runtime.seekHint = `✅ Hazırlanıyor... (${track.runtime.stationaryFrames + 1}/${TRACK_DEFAULTS.stationaryFrames})`;
     track.runtime.stationaryFrames++;
     if (track.runtime.stationaryFrames >= TRACK_DEFAULTS.stationaryFrames) enterTrackPhase('ARMED');
 }
@@ -4717,6 +4793,10 @@ function updateTrackTelemetry() {
         html += `<span class="track-checkpoint-chip ${cls}">${label}</span>`;
     });
     html += '</div>';
+    // 🔥 FIX 2: Bekleme nedeni göster
+    if (track.runtime.phase === 'SEEKING' && track.runtime.seekHint) {
+        html += `<div style="font-size:10px;color:var(--accent-amber);margin-top:6px;line-height:1.4;">${track.runtime.seekHint}</div>`;
+    }
     telDynamic.innerHTML = html;
 }
 
@@ -5489,6 +5569,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.device-card').forEach(c => { if (c.dataset.device === suggested) c.classList.add('suggested'); });
         applyDeviceLayout(suggested);
 
+        // 🔥 FIX 1: Kaydedilmiş kamera yönünü geri yükle
+        try {
+            const fm = localStorage.getItem('azythos_facing_mode');
+            if (fm === 'environment') {
+                STATE.facingMode = 'environment';
+                STATE.mirror = false;
+                const mm = document.getElementById('mirrorMode');
+                if (mm) mm.checked = false;
+            }
+        } catch (_) {}
+
         try {
             const gs = localStorage.getItem('azythos_gold_standard');
             if (gs !== null) { STATE.goldStandardEnabled = gs === '1'; document.getElementById('goldStandardToggle').checked = STATE.goldStandardEnabled; }
@@ -5610,6 +5701,7 @@ window.cancelTrackPlacement = cancelTrackPlacement;
 window.finalizeTrackPlacement = finalizeTrackPlacement;
 window.exportTrackCSV = exportTrackCSV;
 window.closeTrackResult = closeTrackResult;
+window.scrollToCameraView = scrollToCameraView;
 window.downloadAthleteJSON = downloadAthleteJSON;
 window.handleImportFile = handleImportFile;
 window.importAthleteJSON = importAthleteJSON;
